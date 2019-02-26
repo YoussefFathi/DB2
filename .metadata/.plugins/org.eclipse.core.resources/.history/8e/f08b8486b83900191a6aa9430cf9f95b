@@ -1,0 +1,62 @@
+package mashayet;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class Table implements Serializable {
+
+	
+//	private static final long serialVersionUID = 1L;
+	transient private ArrayList pages= new ArrayList();
+	public Table() {
+		Page first= new Page();
+		pages.add((long)first.getID());
+		this.writePage(first);
+	}
+	public void writePage(Page page) {
+	
+		try {
+			FileOutputStream fileOut = new FileOutputStream("Page.class");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(page);
+			out.close();
+			fileOut.close();
+			System.out.printf("Serialized data is saved in Page.class");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+		
+	
+	public  Page readPage() {
+		
+		 try {
+	         FileInputStream fileIn = new FileInputStream("Page.class");
+	         ObjectInputStream in = new ObjectInputStream(fileIn);
+	         Page e = (Page) in.readObject();
+	         in.close();
+	         fileIn.close();
+	         return e;
+	      } catch (IOException i) {
+	         i.printStackTrace();
+	        return null;
+	         
+	      } catch (ClassNotFoundException c) {
+	         System.out.println("Page class not found");
+	         c.printStackTrace();
+	         return null;
+	      }
+	}
+	public static void main(String[] args) {
+		Table new1 = new Table();
+		Page pge = new1.readPage();
+		System.out.println(pge.readTuples());
+
+	}
+
+}
