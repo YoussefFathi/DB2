@@ -10,14 +10,20 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Vector;
+import java.util.function.Consumer;
 
 public class Table implements Serializable {
 
 	// private static final long serialVersionUID = 1L;
-	transient private ArrayList pages = new ArrayList();
+	transient private ArrayList<Integer> pages = new ArrayList();
 	private String tableName = "";
-	private final int maxRows = 5;
-	private int attrNo=0;
+	private final int maxRows = 2;
+	private int noRows = 0;
+	private String tableKey = "";
+	private int attrNo = 0;
+	private ArrayList columnNames = new ArrayList();
+
 	public Table(String tableName, String strClusteringKeyColumn, Hashtable<String, String> htblColNameType) {
 		this.tableName = tableName;
 		try {
@@ -27,15 +33,8 @@ public class Table implements Serializable {
 			e.printStackTrace();
 		}
 		Page first = new Page();
-		Page second = new Page();
 		pages.add(0);
-		pages.add((int) (pages.get(pages.size() - 1)) + 1);
-		first.addTuple("this is the first tuple");
-		second.addTuple("this is the second tuple");
 		this.writePage(first, 0);
-		this.writePage(second, (int) (pages.get(pages.size() - 1)));
-		this.readPage(0);
-		this.readPage((int) (pages.get(pages.size() - 1)));
 	}
 
 	public void addToMeta(String key, Hashtable<String, String> table) throws IOException {
@@ -45,6 +44,7 @@ public class Table implements Serializable {
 			writer.append('\n');
 			table.forEach((name, type) -> {
 				try {
+					columnNames.add(name);
 					attrNo++;
 					writer.append(this.tableName);
 					writer.append(',');
@@ -53,6 +53,7 @@ public class Table implements Serializable {
 					writer.append(type);
 					writer.append(',');
 					if (key.equals(name)) {
+						tableKey = key;
 						writer.append("True");
 					} else {
 						writer.append("False");
@@ -73,27 +74,104 @@ public class Table implements Serializable {
 		}
 	}
 
+	public String getName() {
+		return tableName;
+
+	}
+	public ArrayList getArrayFromHash(Hashtable<String, Object> hash) {
+		ArrayList attrs = new ArrayList();
+		hash.forEach((name, value) -> {
+				attrs.add(columnNames.indexOf(name), value);
+		});
+		return attrs;
+	}
+	public void updateTuple(Object key,Hashtable<String, Object> htblColNameValue) {
+		for(int i =0;i<pages.size();i++) {
+			Page tempPage = readPage(pages.get(i));
+			Vector tuples = tempPage.readTuples();
+			for(int j =0;j<tuples.size();j++) {
+				if(((Tuple)tuples.get(j)).getAttributes().contains(key)) {
+					ArrayList attrs = getArrayFromHash(htblColNameValue);
+					((Tuple)tuples.get(j)).setAttributes(attrs);
+					this.writePage(tempPage, i);
+					
+					return;
+				}
+			}
+		}
+	}
+	@SuppressWarnings("unchecked")
+	public boolean findKey(String key, Page page) {
+		boolean found=false;
+		for(int i =0;i<page.readTuples().size();i++) {
+			if(((Tuple)page.readTuples().get(i)).getAttributes().contains(key)) {
+				return true;
+			}
+		}
+		return false;
+			
+			
+	
+		
+	}
+	public void insertTuple(Hashtable<String, Object> htblColNameValue) {
+		int pageNo = 0;
+		Page currentPage = null;
+		if (noRows == maxRows) {
+			pageNo = pages.size();
+			currentPage = new Page();
+			pages.add(pageNo);
+			noRows = 0;
+		} else {
+			pageNo = pages.size() - 1;
+			currentPage = readPage(pageNo);
+		}
+		ArrayList attrs = new ArrayList();
+		htblColNameValue.forEach((name, value) -> {
+			if (checkType(name, value)) {
+				attrs.add(columnNames.indexOf(name), value);
+			}
+
+		});
+		currentPage.addTuple(new Tuple(attrs));
+		writePage(currentPage, pageNo);
+		readPage(pageNo);
+		noRows++;
+
+	}
+
+	public boolean checkType(String name, Object value) {
+		return true;
+
+	}
+
 	public void writePage(Page page, int indicator) {
 
 		try {
-			FileOutputStream fileOut = new FileOutputStream("Page" + indicator + ".class");
+			FileOutputStream fileOut = new FileOutputStream(tableName + " P" + indicator + ".class");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(page);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in Page.class");
+			System.out.println("Serialized data is saved in " + tableName + " P" + indicator + ".class");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public Page readPage(int indicator) {
 
 		try {
-			FileInputStream fileIn = new FileInputStream("Page" + indicator + ".class");
+			FileInputStream fileIn = new FileInputStream(tableName + " P" + indicator + ".class");
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			Page e = (Page) in.readObject();
-			System.out.println(e.readTuples());
+			int i = 0;
+			e.readTuples().forEach((b) -> {
+				System.out.print("TUPLE :");
+				System.out.println(((Tuple) b).getAttributes());
+
+			});
+
 			in.close();
 			fileIn.close();
 			return e;

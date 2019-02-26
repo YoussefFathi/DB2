@@ -7,9 +7,9 @@ import java.util.Vector;
 public class Page implements Serializable {
 
 	private static final long serialVersionUID = 1214738099184642172L;
-	private Vector<String> tuples = new Vector();
+	private Vector<Tuple> tuples = new Vector();
 
-	public void addTuple(String tuple) {
+	public void addTuple(Tuple tuple) {
 		tuples.add(tuple);
 	}
 	public Vector readTuples() {
