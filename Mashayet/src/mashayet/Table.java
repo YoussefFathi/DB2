@@ -1,17 +1,25 @@
 package mashayet;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Vector;
 import java.util.function.Consumer;
+
+import Exceptions.DBAppException;
 
 public class Table implements Serializable {
 
@@ -126,23 +134,56 @@ public class Table implements Serializable {
 			pageNo = pages.size() - 1;
 			currentPage = readPage(pageNo);
 		}
-		ArrayList attrs = new ArrayList();
-		htblColNameValue.forEach((name, value) -> {
+		ArrayList attrs = new ArrayList(attrNo);
+		 Set<String> names = htblColNameValue.keySet();
+		for(String name : names) {
+			Object value = htblColNameValue.get(name);
+//			System.out.println(name +value);
 			if (checkType(name, value)) {
-				attrs.add(columnNames.indexOf(name), value);
+				attrs.add( value);
+			}else {
+				System.out.println("Invalid Input for"+ name + " "+ value);
+				return;
 			}
 
-		});
+		}
 		currentPage.addTuple(new Tuple(attrs));
 		writePage(currentPage, pageNo);
 		readPage(pageNo);
 		noRows++;
 
 	}
+//	public Class<?> getType(String name) {
+//		switch (name) {
+//		case "java.lang.Integer":return int.class;
+//		case "java.lang.String":return String.class;
+//		case "java.lang.Double":return double.class;
+//		case "java.lang.Boolean":return boolean.class;
+//		case "java.util.Date":return Date.class;
+//		default:return null;
+//		}
+//	}
 
 	public boolean checkType(String name, Object value) {
-		return true;
-
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File("metaData.csv")));
+			reader.readLine();
+			String line="";
+			while((line=reader.readLine())!=null) {
+				String[] parts = line.split(",");
+				if((name.equals(parts[1]))&& (value.getClass().getName().equals(parts[2]))) {
+					return true;
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+		
 	}
 
 	public void writePage(Page page, int indicator) {

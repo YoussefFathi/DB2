@@ -59,7 +59,7 @@ public class DBApp {
 		Hashtable htblColNameType = new Hashtable();
 		htblColNameType.put("id", "java.lang.Integer");
 		htblColNameType.put("name", "java.lang.String");
-		htblColNameType.put("gpa", "java.lang.double");
+		htblColNameType.put("gpa", "java.lang.Double");
 		DBApp app = new DBApp();
 		try {
 			app.createTable(strTableName, "id", htblColNameType);
@@ -86,12 +86,12 @@ public class DBApp {
 			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(78452));
 			htblColNameValue.put("name", new String("Zaky Noor"));
-			htblColNameValue.put("gpa", new Double(0.88));
+			htblColNameValue.put("gpa", new Integer(1));
 			app.insertIntoTable(strTableName, htblColNameValue);
 			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(78452));
 			htblColNameValue.put("name", new String("Zaky Ypussef Fathi"));
-			htblColNameValue.put("gpa", new Double(0.89));
+			htblColNameValue.put("gpa", new Integer(1));
 			app.updateTable(strTableName,new Integer(78452), htblColNameValue);
 
 		} catch (DBAppException e) {
