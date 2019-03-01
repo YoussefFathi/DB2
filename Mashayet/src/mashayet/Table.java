@@ -136,18 +136,20 @@ public class Table implements Serializable {
 		}
 		ArrayList attrs = new ArrayList(attrNo);
 		 Set<String> names = htblColNameValue.keySet();
+		 int key=0;
 		for(String name : names) {
 			Object value = htblColNameValue.get(name);
 //			System.out.println(name +value);
 			if (checkType(name, value)) {
 				attrs.add( value);
+				if(name.equals(tableKey)){key=attrs.size();}
 			}else {
 				System.out.println("Invalid Input for"+ name + " "+ value);
 				return;
 			}
 
 		}
-		currentPage.addTuple(new Tuple(attrs));
+		currentPage.addTuple(new Tuple(attrs,key));
 		writePage(currentPage, pageNo);
 		readPage(pageNo);
 		noRows++;
@@ -228,7 +230,6 @@ public class Table implements Serializable {
 	}
 
 	public static void main(String[] args) {
-
 	}
 
 }

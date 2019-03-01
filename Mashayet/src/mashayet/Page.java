@@ -1,7 +1,9 @@
 package mashayet;
 
 import java.io.Serializable;
-import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Vector;
 
 public class Page implements Serializable {
@@ -20,7 +22,6 @@ public class Page implements Serializable {
 	}
 	public static void main(String[] args) {
 		
-
 	}
 
 }

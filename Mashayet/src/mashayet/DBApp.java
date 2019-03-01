@@ -46,6 +46,13 @@ public class DBApp {
 	}
 
 	public void deleteFromTable(String strTableName, Hashtable<String, Object> htblColNameValue) throws DBAppException {
+		tables.forEach((c) -> {
+			if (c.getName().equals(strTableName)) {
+				
+
+			}
+
+		});
 
 	}
 
