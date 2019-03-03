@@ -106,7 +106,11 @@ public class Table implements Serializable {
 					Tuple removed = (Tuple) tuples.remove(j);
 					removed.setAttributes(attrs);
 					this.writePage(tempPage, i);
-					insertSortedTuple(htblColNameValue);
+					try {
+						insertSortedTuple(htblColNameValue);
+					} catch (DBAppException e) {
+						System.out.println(e.getMessage());
+					}
 					readPage(i);
 					return;
 				}
@@ -243,7 +247,7 @@ public class Table implements Serializable {
 
 		ArrayList colNames = new ArrayList();
 		Set<String> names = htblColNameValue.keySet();
-		int key = 0;
+		int key = -1;
 		for (String name : names) {
 
 			Object value = htblColNameValue.get(name);
@@ -269,7 +273,7 @@ public class Table implements Serializable {
 			Vector<Tuple> tempVector = currentPage.readTuples();
 			for (int j = 0; j < tempVector.size(); j++) {
 				if (tempVector.get(j).compareTo(tupleToDelete) == 0) {
-					tempVector.remove(j);
+					tempVector.remove(j--);
 					if (tempVector.size() == 0 && i != pages.size() - 1) {
 						shiftPagesUp(i);
 					} else if (!(tempVector.size() == 0) && i != pages.size() - 1) {
@@ -304,13 +308,13 @@ public class Table implements Serializable {
 		}
 	}
 
-	public void insertSortedTuple(Hashtable<String, Object> htblColNameValue) {
+	public void insertSortedTuple(Hashtable<String, Object> htblColNameValue) throws DBAppException {
 		int pageNo = 0;
 		ArrayList attrs = new ArrayList(attrNo);
 
 		ArrayList colNames = new ArrayList();
 		Set<String> names = htblColNameValue.keySet();
-		int key = 0;
+		int key = -1;
 		for (String name : names) {
 
 			Object value = htblColNameValue.get(name);
@@ -338,7 +342,12 @@ public class Table implements Serializable {
 			currentPage = readPage(i);
 			Vector<Tuple> tempVector = currentPage.readTuples();
 			for (int j = 0; j < tempVector.size(); j++) {
-				if (tempVector.get(j).compareTo(tupleToInsert) >= 0) {
+				System.out.println(tupleToInsert);
+				System.out.println(tempVector.get(j));
+				if(tempVector.get(j).compareTo(tupleToInsert)==2 || tempVector.get(j).compareTo(tupleToInsert)==0){
+					throw new DBAppException("Duplicate Insertion");
+					}
+				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
 					if (j == 0 && i > 0) {
 						Page previousPage = readPage(i - 1);
 						previousPage.addTuple(tupleToInsert);
@@ -375,6 +384,10 @@ public class Table implements Serializable {
 
 		currentPage = readPage(pages.size() - 1);
 		Vector<Tuple> tempVector = currentPage.readTuples();
+		for(int j=0;j<tempVector.size();j++){
+		if(tempVector.get(j).compareTo(tupleToInsert)==2 || tempVector.get(j).compareTo(tupleToInsert)==0){
+			throw new DBAppException("Duplicate Insertion");
+			}}
 		if (tempVector.size() == maxRows) {
 			currentPage.addTuple(tupleToInsert);
 			currentPage.sort();

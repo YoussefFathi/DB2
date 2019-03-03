@@ -27,7 +27,11 @@ public class DBApp {
 	public void insertIntoTable(String strTableName, Hashtable<String, Object> htblColNameValue) throws DBAppException {
 		tables.forEach((c) -> {
 			if (c.getName().equals(strTableName)) {
-				c.insertSortedTuple(htblColNameValue);
+				try {
+					c.insertSortedTuple(htblColNameValue);
+				} catch (DBAppException e) {
+					System.out.println(e.getMessage());
+				}
 
 			}
 
@@ -102,6 +106,11 @@ public class DBApp {
 			htblColNameValue.put("gpa", new Double(1));
 			app.updateTable(strTableName,new Integer(78452), htblColNameValue);
 			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(78452));
+			htblColNameValue.put("name", new String("Zaky Noor"));
+			htblColNameValue.put("gpa", new Double(1));
+			app.insertIntoTable(strTableName, htblColNameValue);
+			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(2343432));
 			htblColNameValue.put("name", new String("Ahmed Noor"));
 			htblColNameValue.put("gpa", new Double(0.95));
@@ -111,11 +120,25 @@ public class DBApp {
 			htblColNameValue.put("name", new String("Ahmed Noor"));
 			htblColNameValue.put("gpa", new Double(0.95));
 			app.deleteFromTable(strTableName, htblColNameValue);
-			htblColNameValue.clear();
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(5674567));
+//			htblColNameValue.put("name", new String("Dalia Noor"));
+//			htblColNameValue.put("gpa", new Double(1.25));
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(5674567));
+//			htblColNameValue.put("name", new String("Dalia Noor"));
+//			htblColNameValue.put("gpa", new Double(1.25));
+//			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(5674567));
 			htblColNameValue.put("name", new String("Dalia Noor"));
 			htblColNameValue.put("gpa", new Double(1.25));
-			app.deleteFromTable(strTableName, htblColNameValue);
+			app.insertIntoTable(strTableName, htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(5674567));
+			htblColNameValue.put("name", new String("Dalaia Noor"));
+			htblColNameValue.put("gpa", new Double(1.25));
+			app.insertIntoTable(strTableName, htblColNameValue);
+			
 System.out.println("************************");
 Table t=app.tables.get(0);
 System.out.println(t.getPages().toString());
