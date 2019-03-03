@@ -20,6 +20,9 @@ public class Page implements Serializable {
 	public long getID() {
 		return serialVersionUID;
 	}
+	public void sort(){
+		Collections.sort(tuples);
+	}
 	public static void main(String[] args) {
 		
 	}

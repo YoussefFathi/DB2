@@ -27,7 +27,7 @@ public class DBApp {
 	public void insertIntoTable(String strTableName, Hashtable<String, Object> htblColNameValue) throws DBAppException {
 		tables.forEach((c) -> {
 			if (c.getName().equals(strTableName)) {
-				c.insertTuple(htblColNameValue);
+				c.insertSortedTuple(htblColNameValue);
 
 			}
 
@@ -61,6 +61,7 @@ public class DBApp {
 	// throws DBAppException {
 	//
 	// }
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		String strTableName = "Student";
 		Hashtable htblColNameType = new Hashtable();
@@ -93,14 +94,18 @@ public class DBApp {
 			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(78452));
 			htblColNameValue.put("name", new String("Zaky Noor"));
-			htblColNameValue.put("gpa", new Integer(1));
+			htblColNameValue.put("gpa", new Double(1));
 			app.insertIntoTable(strTableName, htblColNameValue);
 			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(78452));
 			htblColNameValue.put("name", new String("Zaky Ypussef Fathi"));
 			htblColNameValue.put("gpa", new Integer(1));
-			app.updateTable(strTableName,new Integer(78452), htblColNameValue);
-
+			app.updateTable(strTableName,new Double(78452), htblColNameValue);
+System.out.println("************************");
+Table t=app.tables.get(0);
+for(int i=0;i<t.getPages().size();i++){
+	t.readPage(i);
+}
 		} catch (DBAppException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
