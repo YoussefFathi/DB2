@@ -100,7 +100,7 @@ public class DBApp {
 			htblColNameValue.put("id", new Integer(78452));
 			htblColNameValue.put("name", new String("Zaky Ypussef Fathi"));
 			htblColNameValue.put("gpa", new Double(1));
-			app.updateTable(strTableName,new Integer(78452), htblColNameValue);
+//			app.updateTable(strTableName,new Integer(78452), htblColNameValue);
 System.out.println("************************");
 Table t=app.tables.get(0);
 for(int i=0;i<t.getPages().size();i++){

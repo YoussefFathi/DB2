@@ -152,7 +152,7 @@ public class Table implements Serializable {
 			}
 
 		}
-		currentPage.addTuple(new Tuple(attrs,key));
+		currentPage.addTuple(new Tuple(attrs,key,null));
 		writePage(currentPage, pageNo);
 		readPage(pageNo);
 		noRows++;
@@ -234,6 +234,7 @@ public class Table implements Serializable {
 	public void insertSortedTuple(Hashtable<String, Object> htblColNameValue) {
 		int pageNo = 0;
 		ArrayList attrs = new ArrayList(attrNo);
+		ArrayList colNames=new ArrayList();
 		 Set<String> names = htblColNameValue.keySet();
 		 int key=0;
 		for(String name : names) {
@@ -241,7 +242,7 @@ public class Table implements Serializable {
 //			System.out.println(name +value);
 			if (checkType(name, value)) {
 				attrs.add( value);
-				
+				colNames.add(name);
 				if(name.equals(tableKey)){key=attrs.size()-1;}
 			}else {
 				System.out.println("Invalid Input for"+ name + " "+ value);
@@ -249,7 +250,7 @@ public class Table implements Serializable {
 			}
 
 		}
-		Tuple tupleToInsert=new Tuple(attrs,key);
+		Tuple tupleToInsert=new Tuple(attrs,key,colNames);
 		Page currentPage = null;
 		for(int i=0;i<pages.size()-1;i++){
 			currentPage=readPage(i);
