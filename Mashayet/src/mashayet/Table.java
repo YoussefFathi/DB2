@@ -155,7 +155,9 @@ public class Table implements Serializable {
 			}
 
 		}
-		currentPage.addTuple(new Tuple(attrs, key));
+
+		currentPage.addTuple(new Tuple(attrs, key, null));
+
 		writePage(currentPage, pageNo);
 		readPage(pageNo);
 		noRows++;
@@ -235,65 +237,137 @@ public class Table implements Serializable {
 		}
 	}
 
-	public void insertSortedTuple(Hashtable<String, Object> htblColNameValue) {
-		int pageNo = 0;
+	public void deleteTuple(Hashtable<String, Object> htblColNameValue) {
+		Page currentPage = null;
 		ArrayList attrs = new ArrayList(attrNo);
+
+		ArrayList colNames = new ArrayList();
 		Set<String> names = htblColNameValue.keySet();
 		int key = 0;
 		for (String name : names) {
+
 			Object value = htblColNameValue.get(name);
 			// System.out.println(name +value);
 			if (checkType(name, value)) {
-				attrs.add(value);
 
+				attrs.add(value);
+				colNames.add(name);
 				if (name.equals(tableKey)) {
 					key = attrs.size() - 1;
 				}
 			} else {
 				System.out.println("Invalid Input for" + name + " " + value);
+
 				return;
 			}
 
 		}
-		Tuple tupleToInsert = new Tuple(attrs, key);
+
+		Tuple tupleToDelete = new Tuple(attrs, key, colNames);
+		for (int i = 0; i < pages.size(); i++) {
+			currentPage = readPage(i);
+			Vector<Tuple> tempVector = currentPage.readTuples();
+			for (int j = 0; j < tempVector.size(); j++) {
+				if (tempVector.get(j).compareTo(tupleToDelete) == 0) {
+					tempVector.remove(j);
+					if (tempVector.size() == 0 && i != pages.size() - 1) {
+						shiftPagesUp(i);
+					} else if (!(tempVector.size() == 0) && i != pages.size() - 1) {
+						writePage(currentPage, i);
+					} else if (tempVector.size() == 0 && i == pages.size() - 1) {
+						removePage(i);
+					}
+				}
+			}
+		}
+	}
+
+	public void removePage(int pageNo) {
+		pages.remove(pageNo);
+		File toBeDeleted = new File(tableName + " P" + pageNo + ".class");
+
+		if (toBeDeleted.delete()) {
+			System.out.println("File" + pageNo + "Deleted");
+		}
+	}
+
+	public void shiftPagesUp(int startPage) {
+		pages.remove(startPage);
+		for (int i = startPage; i < pages.size(); i++) {
+			pages.set(i, i);
+			Page currentPage = this.readPage(i + 1);
+			this.writePage(currentPage, i);
+		}
+		File toBeDeleted = new File(tableName + " P" + pages.size() + ".class");
+		if (toBeDeleted.delete()) {
+			System.out.println("File" + pages.size() + "Deleted");
+		}
+	}
+
+	public void insertSortedTuple(Hashtable<String, Object> htblColNameValue) {
+		int pageNo = 0;
+		ArrayList attrs = new ArrayList(attrNo);
+
+		ArrayList colNames = new ArrayList();
+		Set<String> names = htblColNameValue.keySet();
+		int key = 0;
+		for (String name : names) {
+
+			Object value = htblColNameValue.get(name);
+			// System.out.println(name +value);
+			if (checkType(name, value)) {
+
+				attrs.add(value);
+				colNames.add(name);
+				if (name.equals(tableKey)) {
+					key = attrs.size() - 1;
+				}
+			} else {
+				System.out.println("Invalid Input for" + name + " " + value);
+
+				return;
+			}
+
+		}
+
+		Tuple tupleToInsert = new Tuple(attrs, key, colNames);
+
 		Page currentPage = null;
 
-		for(int i=0;i<pages.size()-1;i++){
-			currentPage=readPage(i);
-			Vector <Tuple> tempVector= currentPage.readTuples();
-			for(int j=0;j<tempVector.size();j++){
-				if(tempVector.get(j).compareTo(tupleToInsert)>=0){
-					if(j==0 && i>0){
-					Page previousPage=readPage(i-1);
-					previousPage.addTuple(tupleToInsert);
-					previousPage.sort();
-					if(tempVector.size()>maxRows){
-						Tuple overFlowTuple=tempVector.remove(maxRows);
-						writePage(previousPage,i-1);
-						shiftingPages(overFlowTuple,i-1);
-						
+		for (int i = 0; i < pages.size() - 1; i++) {
+			currentPage = readPage(i);
+			Vector<Tuple> tempVector = currentPage.readTuples();
+			for (int j = 0; j < tempVector.size(); j++) {
+				if (tempVector.get(j).compareTo(tupleToInsert) >= 0) {
+					if (j == 0 && i > 0) {
+						Page previousPage = readPage(i - 1);
+						previousPage.addTuple(tupleToInsert);
+						previousPage.sort();
+						if (tempVector.size() > maxRows) {
+							Tuple overFlowTuple = tempVector.remove(maxRows);
+							writePage(previousPage, i - 1);
+							shiftingPages(overFlowTuple, i - 1);
+
+						} else {
+							writePage(previousPage, i - 1);
+
+						}
+						return;
+					} else {
+						currentPage.addTuple(tupleToInsert);
+						currentPage.sort();
+						if (tempVector.size() > maxRows) {
+							Tuple overFlowTuple = tempVector.remove(maxRows);
+							writePage(currentPage, i);
+							shiftingPages(overFlowTuple, ++i);
+
+						} else {
+							writePage(currentPage, i);
+
+						}
 					}
-					else{
-						writePage(previousPage,i-1);
-						
-						
-					}return;
-					}
-					else{
-					currentPage.addTuple(tupleToInsert);
-					currentPage.sort();
-					if(tempVector.size()>maxRows){
-						Tuple overFlowTuple=tempVector.remove(maxRows);
-						writePage(currentPage,i);
-						shiftingPages(overFlowTuple,++i);
-						
-					}
-					else{
-						writePage(currentPage,i);
-						
-						
-					}}
-				return;}
+					return;
+				}
 
 			}
 

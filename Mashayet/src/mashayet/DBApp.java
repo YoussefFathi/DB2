@@ -49,7 +49,7 @@ public class DBApp {
 		tables.forEach((c) -> {
 			if (c.getName().equals(strTableName)) {
 				
-
+				c.deleteTuple(htblColNameValue);
 			}
 
 		});
@@ -101,8 +101,24 @@ public class DBApp {
 			htblColNameValue.put("name", new String("Zaky Ypussef Fathi"));
 			htblColNameValue.put("gpa", new Double(1));
 			app.updateTable(strTableName,new Integer(78452), htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(2343432));
+			htblColNameValue.put("name", new String("Ahmed Noor"));
+			htblColNameValue.put("gpa", new Double(0.95));
+			app.deleteFromTable(strTableName, htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(453455));
+			htblColNameValue.put("name", new String("Ahmed Noor"));
+			htblColNameValue.put("gpa", new Double(0.95));
+			app.deleteFromTable(strTableName, htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(5674567));
+			htblColNameValue.put("name", new String("Dalia Noor"));
+			htblColNameValue.put("gpa", new Double(1.25));
+			app.deleteFromTable(strTableName, htblColNameValue);
 System.out.println("************************");
 Table t=app.tables.get(0);
+System.out.println(t.getPages().toString());
 for(int i=0;i<t.getPages().size();i++){
 	System.out.println("Page :"+i);
 	t.readPage(i);
