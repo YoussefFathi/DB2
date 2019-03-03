@@ -232,21 +232,21 @@ public class Table implements Serializable {
 	}
 	public void insertSortedTuple(Hashtable<String, Object> htblColNameValue) {
 		int pageNo = 0;
-		ArrayList attrs = new ArrayList(attrNo);
+		ArrayList attrs = getArrayFromHash(htblColNameValue);
 		 Set<String> names = htblColNameValue.keySet();
 		 int key=0;
-		for(String name : names) {
+		 for(String name : names) {
 			Object value = htblColNameValue.get(name);
 //			System.out.println(name +value);
-			if (checkType(name, value)) {
-				attrs.add( value);
-				if(name.equals(tableKey)){key=attrs.size()-1;}
-			}else {
-				System.out.println("Invalid Input for"+ name + " "+ value);
-				return;
-			}
+//			if (checkType(name, value)) {
+//				attrs.add(columnNames.indexOf(name), value);
+//			}else {
+//				System.out.println("Invalid Input for"+ name + " "+ value);
+//				return;
+//			}
 
 		}
+		key=columnNames.indexOf(tableKey);
 		Tuple tupleToInsert=new Tuple(attrs,key);
 		Page currentPage = null;
 		for(int i=0;i<pages.size()-1;i++){

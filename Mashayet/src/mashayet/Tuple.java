@@ -19,8 +19,8 @@ public class Tuple implements Serializable, Comparable {
 	@Override
 	public int compareTo(Object tuple1) {
 		try{
-			int thisAttr=Integer.parseInt(""+this.attrs.get(keyIndex));
-			int otherAttr=Integer.parseInt((""+((Tuple)tuple1).attrs.get(keyIndex)));
+			Double thisAttr=Double.parseDouble(""+this.attrs.get(keyIndex));
+			Double otherAttr=Double.parseDouble((""+((Tuple)tuple1).attrs.get(keyIndex)));
 			if(thisAttr>otherAttr){return 1;}
 			else if(thisAttr<otherAttr){return -1;}
 			else{
