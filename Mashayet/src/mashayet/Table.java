@@ -274,26 +274,30 @@ public class Table implements Serializable {
 		
 			currentPage = readPage(pages.size()-1);
 			Vector <Tuple> tempVector= currentPage.readTuples();
-			System.out.println(tempVector.size());
-			System.out.println(tupleToInsert.toString());
 			if(tempVector.size()==maxRows){
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
 				Tuple overFlow=tempVector.remove(maxRows);
-				writePage(currentPage,pages.size());
+				writePage(currentPage,pages.size()-1);
 				currentPage = new Page();
 				pages.add(pages.size());
 				currentPage.addTuple(overFlow);
-				writePage(currentPage, pages.size());
+				writePage(currentPage, pages.size()-1);
 				
 			}
 			else {
+				if(currentPage.readTuples().size()>0){
+					currentPage.addTuple(tupleToInsert);
+					currentPage.sort();
+					writePage(currentPage, pages.size()-1);
+						
+				}
+				else{
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
-				pages.add(pages.size()-1);
-				System.out.println(tempVector.size());
-				writePage(currentPage, pages.size());
-				
+				int num=0;
+				writePage(currentPage, pages.size()-1);
+				}
 			}
 	}
 	public ArrayList<Integer> getPages() {
