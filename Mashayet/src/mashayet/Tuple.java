@@ -46,6 +46,9 @@ public class Tuple implements Serializable, Comparable {
 			else if((thisAttr).compareTo(otherAttr)<0){return -1;}
 			else return 2;
 		}
+		catch(ArrayIndexOutOfBoundsException e){
+			return 1;
+		}
 	}
 	public int getKeyIndex() {
 		return keyIndex;

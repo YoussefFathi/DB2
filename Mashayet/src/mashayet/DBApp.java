@@ -111,7 +111,7 @@ public class DBApp {
 			htblColNameValue.put("gpa", new Double(1));
 			app.insertIntoTable(strTableName, htblColNameValue);
 			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(2343432));
+//			htblColNameValue.put("id", new Integer(2343432));
 			htblColNameValue.put("name", new String("Ahmed Noor"));
 			htblColNameValue.put("gpa", new Double(0.95));
 			app.deleteFromTable(strTableName, htblColNameValue);
@@ -129,16 +129,16 @@ public class DBApp {
 //			htblColNameValue.put("name", new String("Dalia Noor"));
 //			htblColNameValue.put("gpa", new Double(1.25));
 //			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(5674567));
+			htblColNameValue.put("id", new Integer(56745671));
 			htblColNameValue.put("name", new String("Dalia Noor"));
 			htblColNameValue.put("gpa", new Double(1.25));
 			app.insertIntoTable(strTableName, htblColNameValue);
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(5674567));
-			htblColNameValue.put("name", new String("Dalaia Noor"));
-			htblColNameValue.put("gpa", new Double(1.25));
-			app.insertIntoTable(strTableName, htblColNameValue);
-			
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(5674567));
+//			htblColNameValue.put("name", new String("Dalaia Noor"));
+//			htblColNameValue.put("gpa", new Double(1.25));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			
 System.out.println("************************");
 Table t=app.tables.get(0);
 System.out.println(t.getPages().toString());
