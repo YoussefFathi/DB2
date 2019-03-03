@@ -101,10 +101,11 @@ public class Table implements Serializable {
 			for(int j =0;j<tuples.size();j++) {
 				if(((Tuple)tuples.get(j)).getAttributes().contains(key)) {
 					ArrayList attrs = getArrayFromHash(htblColNameValue);
-					((Tuple)tuples.get(j)).setAttributes(attrs);
+					Tuple removed=(Tuple)tuples.remove(j);
+					removed.setAttributes(attrs);
 					this.writePage(tempPage, i);
+					insertSortedTuple(htblColNameValue);
 					readPage(i);
-					
 					return;
 				}
 			}

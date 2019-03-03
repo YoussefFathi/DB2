@@ -99,11 +99,12 @@ public class DBApp {
 			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(78452));
 			htblColNameValue.put("name", new String("Zaky Ypussef Fathi"));
-			htblColNameValue.put("gpa", new Integer(1));
-//			app.updateTable(strTableName,new Integer(78452), htblColNameValue);
+			htblColNameValue.put("gpa", new Double(1));
+			app.updateTable(strTableName,new Integer(78452), htblColNameValue);
 System.out.println("************************");
 Table t=app.tables.get(0);
 for(int i=0;i<t.getPages().size();i++){
+	System.out.println("Page :"+i);
 	t.readPage(i);
 }
 		} catch (DBAppException e) {
