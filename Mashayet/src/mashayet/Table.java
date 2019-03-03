@@ -256,6 +256,23 @@ public class Table implements Serializable {
 			Vector <Tuple> tempVector= currentPage.readTuples();
 			for(int j=0;j<tempVector.size();j++){
 				if(tempVector.get(j).compareTo(tupleToInsert)>=0){
+					if(j==0 && i>0){
+					Page previousPage=readPage(i-1);
+					previousPage.addTuple(tupleToInsert);
+					previousPage.sort();
+					if(tempVector.size()>maxRows){
+						Tuple overFlowTuple=tempVector.remove(maxRows);
+						writePage(previousPage,i-1);
+						shiftingPages(overFlowTuple,i-1);
+						
+					}
+					else{
+						writePage(previousPage,i-1);
+						
+						
+					}return;
+					}
+					else{
 					currentPage.addTuple(tupleToInsert);
 					currentPage.sort();
 					if(tempVector.size()>maxRows){
@@ -268,7 +285,7 @@ public class Table implements Serializable {
 						writePage(currentPage,i);
 						
 						
-					}
+					}}
 				return;}
 			}
 			
