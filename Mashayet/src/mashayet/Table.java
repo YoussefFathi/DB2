@@ -24,7 +24,7 @@ import Exceptions.DBAppException;
 
 public class Table implements Serializable {
 
-//	 private static final long serialVersionUID = 1L;
+	// private static final long serialVersionUID = 1L;
 	transient private ArrayList<Integer> pages = new ArrayList();
 	private String tableName = "";
 	private final int maxRows = 2;
@@ -87,21 +87,23 @@ public class Table implements Serializable {
 		return tableName;
 
 	}
+
 	public ArrayList getArrayFromHash(Hashtable<String, Object> hash) {
 		ArrayList attrs = new ArrayList();
 		hash.forEach((name, value) -> {
-				attrs.add(columnNames.indexOf(name), value);
+			attrs.add(columnNames.indexOf(name), value);
 		});
 		return attrs;
 	}
-	public void updateTuple(Object key,Hashtable<String, Object> htblColNameValue) {
-		for(int i =0;i<pages.size();i++) {
+
+	public void updateTuple(Object key, Hashtable<String, Object> htblColNameValue) {
+		for (int i = 0; i < pages.size(); i++) {
 			Page tempPage = readPage(pages.get(i));
 			Vector tuples = tempPage.readTuples();
-			for(int j =0;j<tuples.size();j++) {
-				if(((Tuple)tuples.get(j)).getAttributes().contains(key)) {
+			for (int j = 0; j < tuples.size(); j++) {
+				if (((Tuple) tuples.get(j)).getAttributes().contains(key)) {
 					ArrayList attrs = getArrayFromHash(htblColNameValue);
-					Tuple removed=(Tuple)tuples.remove(j);
+					Tuple removed = (Tuple) tuples.remove(j);
 					removed.setAttributes(attrs);
 					this.writePage(tempPage, i);
 					insertSortedTuple(htblColNameValue);
@@ -111,20 +113,19 @@ public class Table implements Serializable {
 			}
 		}
 	}
+
 	@SuppressWarnings("unchecked")
 	public boolean findKey(String key, Page page) {
-		boolean found=false;
-		for(int i =0;i<page.readTuples().size();i++) {
-			if(((Tuple)page.readTuples().get(i)).getAttributes().contains(key)) {
+		boolean found = false;
+		for (int i = 0; i < page.readTuples().size(); i++) {
+			if (((Tuple) page.readTuples().get(i)).getAttributes().contains(key)) {
 				return true;
 			}
 		}
 		return false;
-			
-			
-	
-		
+
 	}
+
 	public void insertTuple(Hashtable<String, Object> htblColNameValue) {
 		int pageNo = 0;
 		Page currentPage = null;
@@ -138,45 +139,47 @@ public class Table implements Serializable {
 			currentPage = readPage(pageNo);
 		}
 		ArrayList attrs = new ArrayList(attrNo);
-		 Set<String> names = htblColNameValue.keySet();
-		 int key=0;
-		for(String name : names) {
+		Set<String> names = htblColNameValue.keySet();
+		int key = 0;
+		for (String name : names) {
 			Object value = htblColNameValue.get(name);
-//			System.out.println(name +value);
+			// System.out.println(name +value);
 			if (checkType(name, value)) {
-				attrs.add( value);
-				if(name.equals(tableKey)){key=attrs.size();}
-			}else {
-				System.out.println("Invalid Input for"+ name + " "+ value);
+				attrs.add(value);
+				if (name.equals(tableKey)) {
+					key = attrs.size();
+				}
+			} else {
+				System.out.println("Invalid Input for" + name + " " + value);
 				return;
 			}
 
 		}
-		currentPage.addTuple(new Tuple(attrs,key));
+		currentPage.addTuple(new Tuple(attrs, key));
 		writePage(currentPage, pageNo);
 		readPage(pageNo);
 		noRows++;
 
 	}
-//	public Class<?> getType(String name) {
-//		switch (name) {
-//		case "java.lang.Integer":return int.class;
-//		case "java.lang.String":return String.class;
-//		case "java.lang.Double":return double.class;
-//		case "java.lang.Boolean":return boolean.class;
-//		case "java.util.Date":return Date.class;
-//		default:return null;
-//		}
-//	}
+	// public Class<?> getType(String name) {
+	// switch (name) {
+	// case "java.lang.Integer":return int.class;
+	// case "java.lang.String":return String.class;
+	// case "java.lang.Double":return double.class;
+	// case "java.lang.Boolean":return boolean.class;
+	// case "java.util.Date":return Date.class;
+	// default:return null;
+	// }
+	// }
 
 	public boolean checkType(String name, Object value) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(new File("metaData.csv")));
 			reader.readLine();
-			String line="";
-			while((line=reader.readLine())!=null) {
+			String line = "";
+			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split(",");
-				if((name.equals(parts[1]))&& (value.getClass().getName().equals(parts[2]))) {
+				if ((name.equals(parts[1])) && (value.getClass().getName().equals(parts[2]))) {
 					return true;
 				}
 			}
@@ -188,7 +191,7 @@ public class Table implements Serializable {
 			e.printStackTrace();
 		}
 		return false;
-		
+
 	}
 
 	public void writePage(Page page, int indicator) {
@@ -204,7 +207,7 @@ public class Table implements Serializable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Page readPage(int indicator) {
 
 		try {
@@ -231,108 +234,107 @@ public class Table implements Serializable {
 			return null;
 		}
 	}
+
 	public void insertSortedTuple(Hashtable<String, Object> htblColNameValue) {
 		int pageNo = 0;
 		ArrayList attrs = new ArrayList(attrNo);
-		 Set<String> names = htblColNameValue.keySet();
-		 int key=0;
-		for(String name : names) {
+		Set<String> names = htblColNameValue.keySet();
+		int key = 0;
+		for (String name : names) {
 			Object value = htblColNameValue.get(name);
-//			System.out.println(name +value);
+			// System.out.println(name +value);
 			if (checkType(name, value)) {
-				attrs.add( value);
-				
-				if(name.equals(tableKey)){key=attrs.size()-1;}
-			}else {
-				System.out.println("Invalid Input for"+ name + " "+ value);
+				attrs.add(value);
+
+				if (name.equals(tableKey)) {
+					key = attrs.size() - 1;
+				}
+			} else {
+				System.out.println("Invalid Input for" + name + " " + value);
 				return;
 			}
 
 		}
-		Tuple tupleToInsert=new Tuple(attrs,key);
+		Tuple tupleToInsert = new Tuple(attrs, key);
 		Page currentPage = null;
-		for(int i=0;i<pages.size()-1;i++){
-			currentPage=readPage(i);
-			Vector <Tuple> tempVector= currentPage.readTuples();
-			for(int j=0;j<tempVector.size();j++){
-				if(tempVector.get(j).compareTo(tupleToInsert)>=0){
+		for (int i = 0; i < pages.size() - 1; i++) {
+			currentPage = readPage(i);
+			Vector<Tuple> tempVector = currentPage.readTuples();
+			for (int j = 0; j < tempVector.size(); j++) {
+				if (tempVector.get(j).compareTo(tupleToInsert) >= 0) {
 					currentPage.addTuple(tupleToInsert);
 					currentPage.sort();
-					if(tempVector.size()>maxRows){
-						Tuple overFlowTuple=tempVector.remove(maxRows);
-						writePage(currentPage,i);
-						shiftingPages(overFlowTuple,++i);
-						
+					if (tempVector.size() > maxRows) {
+						Tuple overFlowTuple = tempVector.remove(maxRows);
+						writePage(currentPage, i);
+						shiftingPages(overFlowTuple, ++i);
+
+					} else {
+						writePage(currentPage, i);
+
 					}
-					else{
-						writePage(currentPage,i);
-						
-						
-					}
-				return;}
+					return;
+				}
 			}
-			
+
 		}
-		
-			currentPage = readPage(pages.size()-1);
-			Vector <Tuple> tempVector= currentPage.readTuples();
-			if(tempVector.size()==maxRows){
+
+		currentPage = readPage(pages.size() - 1);
+		Vector<Tuple> tempVector = currentPage.readTuples();
+		if (tempVector.size() == maxRows) {
+			currentPage.addTuple(tupleToInsert);
+			currentPage.sort();
+			Tuple overFlow = tempVector.remove(maxRows);
+			writePage(currentPage, pages.size() - 1);
+			currentPage = new Page();
+			pages.add(pages.size());
+			currentPage.addTuple(overFlow);
+			writePage(currentPage, pages.size() - 1);
+
+		} else {
+			if (currentPage.readTuples().size() > 0) {
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
-				Tuple overFlow=tempVector.remove(maxRows);
-				writePage(currentPage,pages.size()-1);
-				currentPage = new Page();
-				pages.add(pages.size());
-				currentPage.addTuple(overFlow);
-				writePage(currentPage, pages.size()-1);
-				
-			}
-			else {
-				if(currentPage.readTuples().size()>0){
-					currentPage.addTuple(tupleToInsert);
-					currentPage.sort();
-					writePage(currentPage, pages.size()-1);
-						
-				}
-				else{
+				writePage(currentPage, pages.size() - 1);
+
+			} else {
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
-				int num=0;
-				writePage(currentPage, pages.size()-1);
-				}
+				int num = 0;
+				writePage(currentPage, pages.size() - 1);
 			}
+		}
 	}
+
 	public ArrayList<Integer> getPages() {
 		return pages;
 	}
 
-	public void shiftingPages(Tuple overFlowTuple,int index){
-		if (index>=pages.size()){
-			int pageNo= pages.size();
-		 Page currentPage = new Page();
+	public void shiftingPages(Tuple overFlowTuple, int index) {
+		if (index >= pages.size()) {
+			int pageNo = pages.size();
+			Page currentPage = new Page();
 			pages.add(pageNo);
 			currentPage.addTuple(overFlowTuple);
-			writePage(currentPage,index);
-		}
-		else {
-			Page currentPage=readPage(index);
-			if(currentPage.readTuples().size()<maxRows){
+			writePage(currentPage, index);
+		} else {
+			Page currentPage = readPage(index);
+			if (currentPage.readTuples().size() < maxRows) {
 				currentPage.addTuple(overFlowTuple);
 				currentPage.sort();
-				writePage(currentPage,index);
+				writePage(currentPage, index);
+			} else {
+				currentPage.addTuple(overFlowTuple);
+				currentPage.sort();
+				Tuple newOverFlow = (Tuple) currentPage.readTuples().remove(maxRows);
+				writePage(currentPage, index);
+				shiftingPages(newOverFlow, ++index);
 			}
-			else
-			{
-			currentPage.addTuple(overFlowTuple);
-			currentPage.sort();
-			Tuple newOverFlow=(Tuple) currentPage.readTuples().remove(maxRows);
-			writePage(currentPage,index);
-			shiftingPages(newOverFlow,++index);
-			}
-			
+
 		}
-		
+
 	}
+
 	public static void main(String[] args) {
 	}
 
