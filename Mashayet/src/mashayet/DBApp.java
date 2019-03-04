@@ -8,7 +8,7 @@ import Exceptions.DBAppException;
 
 public class DBApp {
 	private ArrayList<Table> tables = new ArrayList();
-
+	
 	public void init() {
 		// this does whatever initialization you would like
 	}
@@ -129,9 +129,29 @@ public class DBApp {
 //			htblColNameValue.put("name", new String("Dalia Noor"));
 //			htblColNameValue.put("gpa", new Double(1.25));
 //			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(56745671));
+			htblColNameValue.put("id", new Integer(5674567));
 			htblColNameValue.put("name", new String("Dalia Noor"));
-			htblColNameValue.put("gpa", new Double(1.25));
+			htblColNameValue.put("gpa", new Double(1.35));
+			app.insertIntoTable(strTableName, htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(784352));
+			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
+			htblColNameValue.put("gpa", new Double(11));
+			app.insertIntoTable(strTableName, htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(784351));
+			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
+			htblColNameValue.put("gpa", new Double(11));
+			app.insertIntoTable(strTableName, htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(784353));
+			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
+			htblColNameValue.put("gpa", new Double(11));
+			app.insertIntoTable(strTableName, htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(7843544));
+			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
+			htblColNameValue.put("gpa", new Double(11));
 			app.insertIntoTable(strTableName, htblColNameValue);
 //			htblColNameValue.clear();
 //			htblColNameValue.put("id", new Integer(5674567));

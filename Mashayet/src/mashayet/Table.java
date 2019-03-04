@@ -19,7 +19,7 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.Vector;
 import java.util.function.Consumer;
-
+import java.util.Properties;
 import Exceptions.DBAppException;
 
 public class Table implements Serializable {
@@ -27,11 +27,12 @@ public class Table implements Serializable {
 	// private static final long serialVersionUID = 1L;
 	transient private ArrayList<Integer> pages = new ArrayList();
 	private String tableName = "";
-	private final int maxRows = 2;
+	private  int maxRows ;
 	private int noRows = 0;
 	private String tableKey = "";
 	private int attrNo = 0;
 	private ArrayList columnNames = new ArrayList();
+	private Properties properties = new Properties();
 
 	public Table(String tableName, String strClusteringKeyColumn, Hashtable<String, String> htblColNameType) {
 		this.tableName = tableName;
@@ -44,10 +45,27 @@ public class Table implements Serializable {
 		Page first = new Page();
 		pages.add(0);
 		this.writePage(first, 0);
+		addToProps();
+		maxRows = Integer.parseInt(properties.getProperty("maxRows"));
+	}
+
+	public void addToProps() {
+		try {
+			FileWriter file = new FileWriter(new File("./config/DBApp.config"));
+			properties.setProperty("maxRows", "2");
+			properties.setProperty("tableName", tableName);
+			properties.store(file, null);
+			file.flush();
+			file.close();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void addToMeta(String key, Hashtable<String, String> table) throws IOException {
-		FileWriter writer = new FileWriter(new File("metaData.csv"));
+		FileWriter writer = new FileWriter(new File("./data/metaData.csv"));
 		try {
 			writer.append("Table Name, Column Name, Column Type, Key,Indexed ");
 			writer.append('\n');
@@ -180,7 +198,7 @@ public class Table implements Serializable {
 
 	public boolean checkType(String name, Object value) {
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(new File("metaData.csv")));
+			BufferedReader reader = new BufferedReader(new FileReader(new File("./data/metaData.csv")));
 			reader.readLine();
 			String line = "";
 			while ((line = reader.readLine()) != null) {
@@ -203,7 +221,7 @@ public class Table implements Serializable {
 	public void writePage(Page page, int indicator) {
 
 		try {
-			FileOutputStream fileOut = new FileOutputStream(tableName + " P" + indicator + ".class");
+			FileOutputStream fileOut = new FileOutputStream("./data/" + tableName + " P" + indicator + ".class");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(page);
 			out.close();
@@ -217,7 +235,7 @@ public class Table implements Serializable {
 	public Page readPage(int indicator) {
 
 		try {
-			FileInputStream fileIn = new FileInputStream(tableName + " P" + indicator + ".class");
+			FileInputStream fileIn = new FileInputStream("./data/" + tableName + " P" + indicator + ".class");
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			Page e = (Page) in.readObject();
 			int i = 0;
@@ -344,9 +362,10 @@ public class Table implements Serializable {
 			for (int j = 0; j < tempVector.size(); j++) {
 				System.out.println(tupleToInsert);
 				System.out.println(tempVector.get(j));
-				if(tempVector.get(j).compareTo(tupleToInsert)==2 || tempVector.get(j).compareTo(tupleToInsert)==0){
+				if (tempVector.get(j).compareTo(tupleToInsert) == 2
+						|| tempVector.get(j).compareTo(tupleToInsert) == 0) {
 					throw new DBAppException("Duplicate Insertion");
-					}
+				}
 				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
 					if (j == 0 && i > 0) {
 						Page previousPage = readPage(i - 1);
@@ -384,10 +403,11 @@ public class Table implements Serializable {
 
 		currentPage = readPage(pages.size() - 1);
 		Vector<Tuple> tempVector = currentPage.readTuples();
-		for(int j=0;j<tempVector.size();j++){
-		if(tempVector.get(j).compareTo(tupleToInsert)==2 || tempVector.get(j).compareTo(tupleToInsert)==0){
-			throw new DBAppException("Duplicate Insertion");
-			}}
+		for (int j = 0; j < tempVector.size(); j++) {
+			if (tempVector.get(j).compareTo(tupleToInsert) == 2 || tempVector.get(j).compareTo(tupleToInsert) == 0) {
+				throw new DBAppException("Duplicate Insertion");
+			}
+		}
 		if (tempVector.size() == maxRows) {
 			currentPage.addTuple(tupleToInsert);
 			currentPage.sort();
