@@ -122,12 +122,16 @@ public class Table implements Serializable {
 				if (((Tuple) tuples.get(j)).getAttributes().contains(key)) {
 					ArrayList attrs = getArrayFromHash(htblColNameValue);
 					Tuple removed = (Tuple) tuples.remove(j);
-					removed.setAttributes(attrs);
+//					Tuple temp = new Tuple(removed.getAttributes(),removed.getKeyIndex(),removed.getColName());
+//					removed.setAttributes(attrs);
 					this.writePage(tempPage, i);
 					try {
 						insertSortedTuple(htblColNameValue);
 					} catch (DBAppException e) {
 						System.out.println(e.getMessage());
+						tuples.add(j, removed);
+						this.writePage(tempPage, i);
+						
 					}
 					readPage(i);
 					return;
@@ -345,9 +349,7 @@ public class Table implements Serializable {
 					key = attrs.size() - 1;
 				}
 			} else {
-				System.out.println("Invalid Input for" + name + " " + value);
-
-				return;
+				throw new DBAppException("Invalid Input "+name +" , "+ value);
 			}
 
 		}

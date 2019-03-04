@@ -153,6 +153,21 @@ public class DBApp {
 			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
 			htblColNameValue.put("gpa", new Double(11));
 			app.insertIntoTable(strTableName, htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(784));
+			htblColNameValue.put("name", new String("Zaky bo2loz Youssef"));
+			htblColNameValue.put("gpa", new Integer(7));
+			app.updateTable(strTableName,new Integer(7843544), htblColNameValue);
+			htblColNameValue.clear();
+			htblColNameValue.put("id", new Integer(784));
+			htblColNameValue.put("name", new String("Zaky bo2loz Youssef2"));
+			htblColNameValue.put("gpa", new Double(7));
+			app.updateTable(strTableName,new Integer(784353), htblColNameValue);
+			htblColNameValue.clear();
+			
+			htblColNameValue.put("name", new Integer(1));
+		
+			app.deleteFromTable(strTableName, htblColNameValue);
 //			htblColNameValue.clear();
 //			htblColNameValue.put("id", new Integer(5674567));
 //			htblColNameValue.put("name", new String("Dalaia Noor"));

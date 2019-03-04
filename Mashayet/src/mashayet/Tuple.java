@@ -83,4 +83,14 @@ public class Tuple implements Serializable, Comparable {
 		System.out.println(t1.compareTo(t2));
 		
 	}
+	
+	public ArrayList getColName() {
+		return colName;
+	}
+	public void setColName(ArrayList colName) {
+		this.colName = colName;
+	}
+	public void setKeyIndex(int keyIndex) {
+		this.keyIndex = keyIndex;
+	}
 }
