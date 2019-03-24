@@ -22,16 +22,34 @@ public class DBApp {
 	}
 
 	public void createBitmapIndex(String strTableName, String strColName) throws DBAppException {
+		tables.forEach((c) -> {
+			if (c.getName().equals(strTableName)) {
+				try {
+					c.createBitmapIndex(strColName);
+				} catch (DBAppException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+
+		});
 	}
 
 	public void insertIntoTable(String strTableName, Hashtable<String, Object> htblColNameValue) throws DBAppException {
 		tables.forEach((c) -> {
 			if (c.getName().equals(strTableName)) {
-				try {
-					c.insertSortedTuple(htblColNameValue);
-				} catch (DBAppException e) {
-					System.out.println(e.getMessage());
-				}
+				
+					try {
+						c.insertSortedTuple(htblColNameValue);
+						
+					} catch (DBAppException e) {
+						// TODO Auto-generated catch block
+						System.out.println(e.getMessage());
+						e.printStackTrace();
+					}
+//					
+				
 
 			}
 
@@ -163,23 +181,30 @@ public class DBApp {
 			htblColNameValue.put("name", new String("Zaky bo2loz Youssef2"));
 			htblColNameValue.put("gpa", new Double(7));
 			app.updateTable(strTableName,new Integer(784353), htblColNameValue);
+			
 			htblColNameValue.clear();
 			
 			htblColNameValue.put("name", new Integer(1));
 		
 			app.deleteFromTable(strTableName, htblColNameValue);
+//			app.createBitmapIndex(strTableName, "name");
+			app.createBitmapIndex(strTableName, "gpa");
 //			htblColNameValue.clear();
 //			htblColNameValue.put("id", new Integer(5674567));
 //			htblColNameValue.put("name", new String("Dalaia Noor"));
 //			htblColNameValue.put("gpa", new Double(1.25));
 //			app.insertIntoTable(strTableName, htblColNameValue);
-//			
+	
 System.out.println("************************");
 Table t=app.tables.get(0);
 System.out.println(t.getPages().toString());
 for(int i=0;i<t.getPages().size();i++){
 	System.out.println("Page :"+i);
 	t.readPage(i);
+}
+for(int i=0;i<t.getBitmapPages().size();i++){
+	System.out.println("BitMapPage :"+i);
+	t.readBitmapPage(i,"gpa");
 }
 		} catch (DBAppException e) {
 			// TODO Auto-generated catch block
