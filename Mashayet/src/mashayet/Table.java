@@ -386,85 +386,105 @@ public class Table implements Serializable {
 
 	public void insertSortedBitmap(BitmapObject tupleToInsert, String colName) throws DBAppException {
 		BitMapPage currentPage = null;
+		int i = 0;
+		boolean first = false;
+		boolean start = false;
+		int count = -1;
+		int startInPages = 0;
+		ArrayList<String> temp = new ArrayList<String>();
 
-		for (int i = 0; i < BitmapPages.size() - 1; i++) {
-			if (BitmapPages.get(i).equals(colName)) {
-				currentPage = readBitmapPage(i, colName);
-				Vector<BitmapObject> tempVector = currentPage.readTuples();
-				for (int j = 0; j < tempVector.size(); j++) {
-					System.out.println(tupleToInsert);
-					System.out.println(tempVector.get(j));
-					if (tempVector.get(j).compareTo(tupleToInsert) == 2
-							|| tempVector.get(j).compareTo(tupleToInsert) == 0) {
-						throw new DBAppException("Duplicate Insertion");
-					}
-					if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
-						if (j == 0 && i > 0) {
-							BitMapPage previousPage = readBitmapPage(i - 1, colName);
-							previousPage.addTuple(tupleToInsert);
-							previousPage.sort();
-							if (tempVector.size() > maxRows) {
-								BitmapObject overFlowTuple = tempVector.remove(maxRows);
-								writeBitmapPage(previousPage, i - 1, colName);
-								shiftingPages(overFlowTuple, i - 1, colName);
-
-							} else {
-								writeBitmapPage(previousPage, i - 1, colName);
-
-							}
-							return;
-						} else {
-							currentPage.addTuple(tupleToInsert);
-							currentPage.sort();
-							if (tempVector.size() > maxRows) {
-								BitmapObject overFlowTuple = tempVector.remove(maxRows);
-								writeBitmapPage(currentPage, i, colName);
-								shiftingPages(overFlowTuple, ++i, colName);
-
-							} else {
-								writeBitmapPage(currentPage, i, colName);
-
-							}
-						}
-						return;
-					}
-
-				}
+		for (int k = 0; k < BitmapPages.size(); k++) {
+			if (BitmapPages.get(k).equals(colName) && !start) {
+				startInPages = k;
+				start = true;
+				temp.add(colName);
+			} else if (!BitmapPages.get(k).equals(colName) && start) {
+				break;
+			} else if (BitmapPages.get(k).equals(colName)) {
+				temp.add(colName);
 			}
 		}
-		if (BitmapPages.get(BitmapPages.size() - 1).equals(colName)) {
-			currentPage = readBitmapPage(BitmapPages.size() - 1, colName);
+		System.out.println(BitmapPages);
+		System.out.println(temp + "TEMPPP");
+		for (i = 0; i < temp.size() - 1; i++) {
+
+			currentPage = readBitmapPage(i, colName);
 			Vector<BitmapObject> tempVector = currentPage.readTuples();
 			for (int j = 0; j < tempVector.size(); j++) {
+				System.out.println(tupleToInsert);
+				System.out.println(tempVector.get(j));
 				if (tempVector.get(j).compareTo(tupleToInsert) == 2
 						|| tempVector.get(j).compareTo(tupleToInsert) == 0) {
 					throw new DBAppException("Duplicate Insertion");
 				}
-			}
-			if (tempVector.size() == maxRows) {
-				currentPage.addTuple(tupleToInsert);
-				currentPage.sort();
-				BitmapObject overFlow = tempVector.remove(maxRows);
-				writeBitmapPage(currentPage, BitmapPages.size() - 1, colName);
-				currentPage = new BitMapPage();
-				BitmapPages.add(colName);
-				currentPage.addTuple(overFlow);
-				writeBitmapPage(currentPage, BitmapPages.size() - 1, colName);
+				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
+					if (j == 0 && i > 0) {
+						BitMapPage previousPage = readBitmapPage(i - 1, colName);
+						previousPage.addTuple(tupleToInsert);
+						previousPage.sort();
+						if (tempVector.size() > maxRows) {
+							BitmapObject overFlowTuple = tempVector.remove(maxRows);
+							writeBitmapPage(previousPage, i - 1, colName);
+							shiftingPages(overFlowTuple, i - 1, colName, temp,startInPages);
 
-			} else {
-				if (currentPage.readTuples().size() > 0) {
-					currentPage.addTuple(tupleToInsert);
-					currentPage.sort();
-					writeBitmapPage(currentPage, BitmapPages.size() - 1, colName);
+						} else {
+							writeBitmapPage(previousPage, i - 1, colName);
 
-				} else {
-					currentPage.addTuple(tupleToInsert);
-					currentPage.sort();
-					int num = 0;
-					writeBitmapPage(currentPage, BitmapPages.size() - 1, colName);
+						}
+						return;
+					} else {
+						currentPage.addTuple(tupleToInsert);
+						currentPage.sort();
+						if (tempVector.size() > maxRows) {
+							BitmapObject overFlowTuple = tempVector.remove(maxRows);
+							writeBitmapPage(currentPage, i, colName);
+							shiftingPages(overFlowTuple, ++i, colName, temp,startInPages);
+
+						} else {
+							writeBitmapPage(currentPage, i, colName);
+
+						}
+					}
+					return;
 				}
+
+			}
+
+		}
+
+		currentPage = readBitmapPage(temp.size() - 1, colName);
+		Vector<BitmapObject> tempVector = currentPage.readTuples();
+		for (int j = 0; j < tempVector.size(); j++) {
+			if (tempVector.get(j).compareTo(tupleToInsert) == 2 || tempVector.get(j).compareTo(tupleToInsert) == 0) {
+				throw new DBAppException("Duplicate Insertion");
 			}
 		}
+		if (tempVector.size() == maxRows) {
+			currentPage.addTuple(tupleToInsert);
+			currentPage.sort();
+			BitmapObject overFlow = tempVector.remove(maxRows);
+			writeBitmapPage(currentPage, temp.size() - 1, colName);
+			currentPage = new BitMapPage();
+
+			BitmapPages.add(startInPages + temp.size(), colName);
+			temp.add(colName);
+			currentPage.addTuple(overFlow);
+			writeBitmapPage(currentPage, temp.size() - 1, colName);
+
+		} else {
+			if (currentPage.readTuples().size() > 0) {
+				currentPage.addTuple(tupleToInsert);
+				currentPage.sort();
+				writeBitmapPage(currentPage, temp.size() - 1, colName);
+
+			} else {
+				currentPage.addTuple(tupleToInsert);
+				currentPage.sort();
+				int num = 0;
+				writeBitmapPage(currentPage, temp.size() - 1, colName);
+			}
+		}
+
 	}
 
 	public void insertSortedTuple(Hashtable<String, Object> htblColNameValue) throws DBAppException {
@@ -651,11 +671,13 @@ public class Table implements Serializable {
 		}
 	}
 
-	public void shiftingPages(BitmapObject overFlowTuple, int index, String colName) {
-		if (index >= BitmapPages.size()) {
-			int pageNo = BitmapPages.size();
+	public void shiftingPages(BitmapObject overFlowTuple, int index, String colName, ArrayList<String> temp,int startIndex) {
+		System.out.println(temp + "In Shift");
+		if (index >= temp.size()) {
+			int pageNo = temp.size();
 			BitMapPage currentPage = new BitMapPage();
-			BitmapPages.add(colName);
+			BitmapPages.add(temp.size()+startIndex, colName);
+			temp.add(colName);
 			currentPage.addTuple(overFlowTuple);
 			writeBitmapPage(currentPage, index, colName);
 		} else {
@@ -669,7 +691,7 @@ public class Table implements Serializable {
 				currentPage.sort();
 				BitmapObject newOverFlow = (BitmapObject) currentPage.readTuples().remove(maxRows);
 				writeBitmapPage(currentPage, index, colName);
-				shiftingPages(newOverFlow, ++index, colName);
+				shiftingPages(newOverFlow, ++index, colName, temp,startIndex);
 			}
 
 		}
