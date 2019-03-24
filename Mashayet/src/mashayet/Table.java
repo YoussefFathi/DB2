@@ -389,6 +389,7 @@ public class Table implements Serializable {
 		int i = 0;
 		boolean first = false;
 		boolean start = false;
+		int[] pageTupleNo = [];
 		int count = -1;
 		int startInPages = 0;
 		ArrayList<String> temp = new ArrayList<String>();
@@ -435,6 +436,7 @@ public class Table implements Serializable {
 					} else {
 						currentPage.addTuple(tupleToInsert);
 						currentPage.sort();
+						
 						if (tempVector.size() > maxRows) {
 							BitmapObject overFlowTuple = tempVector.remove(maxRows);
 							writeBitmapPage(currentPage, i, colName);
