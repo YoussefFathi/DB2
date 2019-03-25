@@ -417,7 +417,7 @@ public class Table implements Serializable {
 				System.out.println(tempVector.get(j));
 				if (tempVector.get(j).compareTo(tupleToInsert) == 2
 						|| tempVector.get(j).compareTo(tupleToInsert) == 0) {
-					throw new DBAppException("Duplicate Insertion");
+//					throw new DBAppException("Duplicate Insertion");
 				}
 				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
 					if (j == 0 && i > 0) {
@@ -601,7 +601,9 @@ public class Table implements Serializable {
 
 	private void bitmapHandleInsert(Tuple tupleToInsert, int countRows) {
 		boolean found=false;
+		System.out.println("countrows= "+countRows);
 		int pageNo=0;
+		BitmapObject newObj=null;
 		int index=-1;
 		for(int i=0;i<bitmappedCols.size();i++){
 			found=false;
@@ -610,6 +612,7 @@ public class Table implements Serializable {
 					index=k;
 				}
 			}
+			
 			for(int j=0;j<BitmapPages.size();j++){
 				if(BitmapPages.get(j).equals(bitmappedCols.get(i))){
 					BitMapPage bp=readBitmapPage(pageNo,bitmappedCols.get(i));
@@ -635,28 +638,31 @@ public class Table implements Serializable {
 			}
 			pageNo=0;
 			if(!found){
-				for (int n = 0; i < pages.size(); n++) { // loop over all pages
+				newObj=new BitmapObject(tupleToInsert.getAttributes().get(index),"");
+				for (int n = 0; n < pages.size(); n++) { // loop over all pages
 					Vector currentTuples = readPage(n).readTuples();
+					
+
 					for (int j = 0; j < currentTuples.size(); j++) { // loop over all tuples per page
 						Tuple tuple = ((Tuple) currentTuples.get(j));
 						int colIndex = tuple.getColName().indexOf(bitmappedCols.get(i));
-						BitmapObject newObj=new BitmapObject(tupleToInsert.getAttributes().get(index),"");
 						Object colValue = tuple.getAttributes().get(colIndex);
 							if (tupleToInsert.getAttributes().get(index).equals(colValue)) {
 								newObj.setBitmap(newObj.getBitmap() + "1");
 							} else {
 								newObj.setBitmap(newObj.getBitmap() + "0");
 							}
-							try {
-								System.out.println(newObj.getBitmap());
-								System.out.println("HI");
-								insertSortedBitmap(newObj, bitmappedCols.get(i));
-							} catch (DBAppException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+							
 					}
 
+				}
+				try {
+					System.out.println(newObj.getBitmap());
+					System.out.println("HI");
+					insertSortedBitmap(newObj, bitmappedCols.get(i));
+				} catch (DBAppException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}
