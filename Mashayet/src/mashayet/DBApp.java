@@ -189,11 +189,11 @@ public class DBApp {
 			app.createBitmapIndex(strTableName, "name");
 			app.createBitmapIndex(strTableName, "gpa");
 			app.createBitmapIndex(strTableName, "id");
-			// htblColNameValue.clear();
-			// htblColNameValue.put("id", new Integer(5674567));
-			// htblColNameValue.put("name", new String("Dalaia Noor"));
-			// htblColNameValue.put("gpa", new Double(1.25));
-			// app.insertIntoTable(strTableName, htblColNameValue);
+			 htblColNameValue.clear();
+			 htblColNameValue.put("id", new Integer(567456127));
+			 htblColNameValue.put("name", new String("Dalaia Noor"));
+			 htblColNameValue.put("gpa", new Double(1.25));
+			 app.insertIntoTable(strTableName, htblColNameValue);
 
 			System.out.println("************************");
 			Table t = app.tables.get(0);
