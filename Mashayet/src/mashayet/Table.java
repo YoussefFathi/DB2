@@ -1,6 +1,7 @@
 package mashayet;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,8 +26,8 @@ import Exceptions.DBAppException;
 public class Table implements Serializable {
 
 	// private static final long serialVersionUID = 1L;
-	transient private ArrayList<Integer> pages = new ArrayList();
-	transient private ArrayList<String> BitmapPages = new ArrayList();
+	private ArrayList<Integer> pages = new ArrayList();
+	private ArrayList<String> BitmapPages = new ArrayList();
 	private String tableName = "";
 	private int maxRows;
 
@@ -75,7 +76,7 @@ public class Table implements Serializable {
 	}
 
 	public void addToMeta(String key, Hashtable<String, String> table) throws IOException {
-		FileWriter writer = new FileWriter(new File("./data/metaData.csv"));
+		FileWriter writer = new FileWriter(new File("./data/metaData.csv"), true);
 		try {
 			writer.append("Table Name, Column Name, Column Type, Key,Indexed ");
 			writer.append('\n');
@@ -117,6 +118,7 @@ public class Table implements Serializable {
 	}
 
 	public ArrayList getArrayFromHash(Hashtable<String, Object> hash) {
+		System.out.println(columnNames + "COL NAMES");
 		ArrayList attrs = new ArrayList();
 		hash.forEach((name, value) -> {
 			attrs.add(columnNames.indexOf(name), value);
@@ -230,6 +232,62 @@ public class Table implements Serializable {
 			e.printStackTrace();
 		}
 		return false;
+
+	}
+
+	public void updateMeta(String colName) {
+		try {
+			File file = new File("./data/metaData.csv");
+			BufferedReader reader = new BufferedReader(new FileReader(new File("./data/metaData.csv")));
+
+			ArrayList<String> lines = new ArrayList();
+			// String first = reader.readLine();
+			lines.add(reader.readLine());
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				
+				
+				String newLine = "";
+				String[] parts = line.split(",");
+				if (parts[0].equals(tableName)) {
+
+					if ((colName.equals(parts[1]))) {
+						parts[4] = "TRUE";
+						for (int i = 0; i < parts.length; i++) {
+							if (i != parts.length - 1)
+								newLine = newLine + parts[i] + ",";
+							else
+								newLine = newLine + parts[i];
+						}
+
+						
+						lines.add(newLine);
+
+					}else {
+						lines.add(line);
+					}
+				}else {
+					lines.add(line);
+				}
+			}
+			reader.close();
+			FileWriter writer1 = new FileWriter(new File("./data/metaData.csv"));
+			writer1.write("");
+			FileWriter writer = new FileWriter(new File("./data/metaData.csv"), true);
+			for (int i = 0; i < lines.size(); i++) {
+				writer.append(lines.get(i) + "");
+				writer.append('\n');
+			}
+
+			writer.flush();
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
@@ -389,7 +447,7 @@ public class Table implements Serializable {
 		int i = 0;
 		boolean first = false;
 		boolean start = false;
-		int[] pageTupleNo = [];
+
 		int count = -1;
 		int startInPages = 0;
 		ArrayList<String> temp = new ArrayList<String>();
@@ -426,7 +484,7 @@ public class Table implements Serializable {
 						if (tempVector.size() > maxRows) {
 							BitmapObject overFlowTuple = tempVector.remove(maxRows);
 							writeBitmapPage(previousPage, i - 1, colName);
-							shiftingPages(overFlowTuple, i - 1, colName, temp,startInPages);
+							shiftingPages(overFlowTuple, i - 1, colName, temp, startInPages);
 
 						} else {
 							writeBitmapPage(previousPage, i - 1, colName);
@@ -436,11 +494,11 @@ public class Table implements Serializable {
 					} else {
 						currentPage.addTuple(tupleToInsert);
 						currentPage.sort();
-						
+
 						if (tempVector.size() > maxRows) {
 							BitmapObject overFlowTuple = tempVector.remove(maxRows);
 							writeBitmapPage(currentPage, i, colName);
-							shiftingPages(overFlowTuple, ++i, colName, temp,startInPages);
+							shiftingPages(overFlowTuple, ++i, colName, temp, startInPages);
 
 						} else {
 							writeBitmapPage(currentPage, i, colName);
@@ -596,6 +654,7 @@ public class Table implements Serializable {
 
 	public void createBitmapIndex(String strColName) throws DBAppException {
 		ArrayList<BitmapObject> uniqueValues = new ArrayList<BitmapObject>();
+		this.updateMeta(strColName);
 		// Retrieved all unique values in column needed
 		for (int i = 0; i < pages.size(); i++) {
 			Vector currentTuples = readPage(i).readTuples();
@@ -673,12 +732,13 @@ public class Table implements Serializable {
 		}
 	}
 
-	public void shiftingPages(BitmapObject overFlowTuple, int index, String colName, ArrayList<String> temp,int startIndex) {
+	public void shiftingPages(BitmapObject overFlowTuple, int index, String colName, ArrayList<String> temp,
+			int startIndex) {
 		System.out.println(temp + "In Shift");
 		if (index >= temp.size()) {
 			int pageNo = temp.size();
 			BitMapPage currentPage = new BitMapPage();
-			BitmapPages.add(temp.size()+startIndex, colName);
+			BitmapPages.add(temp.size() + startIndex, colName);
 			temp.add(colName);
 			currentPage.addTuple(overFlowTuple);
 			writeBitmapPage(currentPage, index, colName);
@@ -693,7 +753,7 @@ public class Table implements Serializable {
 				currentPage.sort();
 				BitmapObject newOverFlow = (BitmapObject) currentPage.readTuples().remove(maxRows);
 				writeBitmapPage(currentPage, index, colName);
-				shiftingPages(newOverFlow, ++index, colName, temp,startIndex);
+				shiftingPages(newOverFlow, ++index, colName, temp, startIndex);
 			}
 
 		}
