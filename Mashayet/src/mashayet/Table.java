@@ -448,6 +448,8 @@ public class Table implements Serializable {
 		boolean first = false;
 		boolean start = false;
 
+		int[] pageTupleNo ;
+
 		int count = -1;
 		int startInPages = 0;
 		ArrayList<String> temp = new ArrayList<String>();
