@@ -1,6 +1,7 @@
 package mashayet;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,8 +26,8 @@ import Exceptions.DBAppException;
 public class Table implements Serializable {
 
 	// private static final long serialVersionUID = 1L;
-	transient private ArrayList<Integer> pages = new ArrayList();
-	transient private ArrayList<String> BitmapPages = new ArrayList();
+	private ArrayList<Integer> pages = new ArrayList();
+	private ArrayList<String> BitmapPages = new ArrayList();
 	private String tableName = "";
 	private int maxRows;
 
@@ -43,7 +44,7 @@ public class Table implements Serializable {
 	private int attrNo = 0;
 	private ArrayList columnNames = new ArrayList();
 	private Properties properties = new Properties();
-	private ArrayList <String> bitmappedCols=new ArrayList();
+	private ArrayList<String> bitmappedCols = new ArrayList();
 
 	public Table(String tableName, String strClusteringKeyColumn, Hashtable<String, String> htblColNameType) {
 		this.tableName = tableName;
@@ -76,7 +77,7 @@ public class Table implements Serializable {
 	}
 
 	public void addToMeta(String key, Hashtable<String, String> table) throws IOException {
-		FileWriter writer = new FileWriter(new File("./data/metaData.csv"));
+		FileWriter writer = new FileWriter(new File("./data/metaData.csv"), true);
 		try {
 			writer.append("Table Name, Column Name, Column Type, Key,Indexed ");
 			writer.append('\n');
@@ -118,6 +119,7 @@ public class Table implements Serializable {
 	}
 
 	public ArrayList getArrayFromHash(Hashtable<String, Object> hash) {
+		System.out.println(columnNames + "COL NAMES");
 		ArrayList attrs = new ArrayList();
 		hash.forEach((name, value) -> {
 			attrs.add(columnNames.indexOf(name), value);
@@ -231,6 +233,60 @@ public class Table implements Serializable {
 			e.printStackTrace();
 		}
 		return false;
+
+	}
+
+	public void updateMeta(String colName) {
+		try {
+			File file = new File("./data/metaData.csv");
+			BufferedReader reader = new BufferedReader(new FileReader(new File("./data/metaData.csv")));
+
+			ArrayList<String> lines = new ArrayList();
+			// String first = reader.readLine();
+			lines.add(reader.readLine());
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+
+				String newLine = "";
+				String[] parts = line.split(",");
+				if (parts[0].equals(tableName)) {
+
+					if ((colName.equals(parts[1]))) {
+						parts[4] = "TRUE";
+						for (int i = 0; i < parts.length; i++) {
+							if (i != parts.length - 1)
+								newLine = newLine + parts[i] + ",";
+							else
+								newLine = newLine + parts[i];
+						}
+
+						lines.add(newLine);
+
+					} else {
+						lines.add(line);
+					}
+				} else {
+					lines.add(line);
+				}
+			}
+			reader.close();
+			FileWriter writer1 = new FileWriter(new File("./data/metaData.csv"));
+			writer1.write("");
+			FileWriter writer = new FileWriter(new File("./data/metaData.csv"), true);
+			for (int i = 0; i < lines.size(); i++) {
+				writer.append(lines.get(i) + "");
+				writer.append('\n');
+			}
+
+			writer.flush();
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
@@ -494,7 +550,9 @@ int countRows=0;
 		int i = 0;
 		boolean first = false;
 		boolean start = false;
-		int[] pageTupleNo ;
+
+		int[] pageTupleNo;
+
 		int count = -1;
 		int startInPages = 0;
 		ArrayList<String> temp = new ArrayList<String>();
@@ -521,7 +579,7 @@ int countRows=0;
 				System.out.println(tempVector.get(j));
 				if (tempVector.get(j).compareTo(tupleToInsert) == 2
 						|| tempVector.get(j).compareTo(tupleToInsert) == 0) {
-//					throw new DBAppException("Duplicate Insertion");
+					// throw new DBAppException("Duplicate Insertion");
 				}
 				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
 					if (j == 0 && i > 0) {
@@ -531,7 +589,7 @@ int countRows=0;
 						if (tempVector.size() > maxRows) {
 							BitmapObject overFlowTuple = tempVector.remove(maxRows);
 							writeBitmapPage(previousPage, i - 1, colName);
-							shiftingPages(overFlowTuple, i - 1, colName, temp,startInPages);
+							shiftingPages(overFlowTuple, i - 1, colName, temp, startInPages);
 
 						} else {
 							writeBitmapPage(previousPage, i - 1, colName);
@@ -541,11 +599,11 @@ int countRows=0;
 					} else {
 						currentPage.addTuple(tupleToInsert);
 						currentPage.sort();
-						
+
 						if (tempVector.size() > maxRows) {
 							BitmapObject overFlowTuple = tempVector.remove(maxRows);
 							writeBitmapPage(currentPage, i, colName);
-							shiftingPages(overFlowTuple, ++i, colName, temp,startInPages);
+							shiftingPages(overFlowTuple, ++i, colName, temp, startInPages);
 
 						} else {
 							writeBitmapPage(currentPage, i, colName);
@@ -597,7 +655,7 @@ int countRows=0;
 	public void insertSortedTuple(Hashtable<String, Object> htblColNameValue) throws DBAppException {
 		int pageNo = 0;
 		ArrayList attrs = new ArrayList(attrNo);
-		int countRows=0;
+		int countRows = 0;
 		ArrayList colNames = new ArrayList();
 		Set<String> names = htblColNameValue.keySet();
 		int key = -1;
@@ -633,7 +691,7 @@ int countRows=0;
 					throw new DBAppException("Duplicate Insertion");
 				}
 				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
-					
+
 					if (j == 0 && i > 0) {
 						Page previousPage = readPage(i - 1);
 						previousPage.addTuple(tupleToInsert);
@@ -642,10 +700,10 @@ int countRows=0;
 							Tuple overFlowTuple = tempVector.remove(maxRows);
 							writePage(previousPage, i - 1);
 							shiftingPages(overFlowTuple, i - 1);
-							bitmapHandleInsert(tupleToInsert,countRows);
+							bitmapHandleInsert(tupleToInsert, countRows);
 						} else {
 							writePage(previousPage, i - 1);
-							bitmapHandleInsert(tupleToInsert,countRows);
+							bitmapHandleInsert(tupleToInsert, countRows);
 						}
 						return;
 					} else {
@@ -656,11 +714,11 @@ int countRows=0;
 							writePage(currentPage, i);
 							shiftingPages(overFlowTuple, ++i);
 							countRows--;
-							bitmapHandleInsert(tupleToInsert,countRows);
+							bitmapHandleInsert(tupleToInsert, countRows);
 
 						} else {
 							writePage(currentPage, i);
-							bitmapHandleInsert(tupleToInsert,countRows);
+							bitmapHandleInsert(tupleToInsert, countRows);
 
 						}
 					}
@@ -676,16 +734,16 @@ int countRows=0;
 		for (int j = 0; j < tempVector.size(); j++) {
 			if (tempVector.get(j).compareTo(tupleToInsert) == 2 || tempVector.get(j).compareTo(tupleToInsert) == 0) {
 				throw new DBAppException("Duplicate Insertion");
-			}
-			else{
-				if (tempVector.get(j).compareTo(tupleToInsert)<0){
+			} else {
+				if (tempVector.get(j).compareTo(tupleToInsert) < 0) {
 					countRows++;
 				}
 			}
-			
+
 		}
 		countRows--;
 		if (tempVector.size() == maxRows) {
+
 			currentPage.addTuple(tupleToInsert);
 			currentPage.sort();
 			Tuple overFlow = tempVector.remove(maxRows);
@@ -694,88 +752,94 @@ int countRows=0;
 			pages.add(pages.size());
 			currentPage.addTuple(overFlow);
 			writePage(currentPage, pages.size() - 1);
-			bitmapHandleInsert(tupleToInsert,countRows);
-
+			bitmapHandleInsert(tupleToInsert, countRows);
 
 		} else {
 			if (currentPage.readTuples().size() > 0) {
+
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
 				writePage(currentPage, pages.size() - 1);
-				bitmapHandleInsert(tupleToInsert,countRows);
+				bitmapHandleInsert(tupleToInsert, countRows);
 
 			} else {
+
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
 				int num = 0;
 				writePage(currentPage, pages.size() - 1);
-				bitmapHandleInsert(tupleToInsert,countRows);
+				bitmapHandleInsert(tupleToInsert, countRows);
 
 			}
 		}
 	}
 
+	public void bitmapHandleUpdate() {
+
+	}
+
 	private void bitmapHandleInsert(Tuple tupleToInsert, int countRows) {
-		boolean found=false;
-		System.out.println("countrows= "+countRows);
-		int pageNo=0;
-		BitmapObject newObj=null;
-		int index=-1;
-		for(int i=0;i<bitmappedCols.size();i++){
-			found=false;
-			for(int k=0;k<tupleToInsert.getColName().size();k++){
-				if(tupleToInsert.getColName().get(k).equals(bitmappedCols.get(i))){
-					index=k;
+		boolean found = false;
+		System.out.println("countrows= " + countRows);
+		int pageNo = 0;
+		BitmapObject newObj = null;
+		int index = -1;
+		for (int i = 0; i < bitmappedCols.size(); i++) {
+			found = false;
+			for (int k = 0; k < tupleToInsert.getColName().size(); k++) {
+				if (tupleToInsert.getColName().get(k).equals(bitmappedCols.get(i))) {
+					index = k;
+
 				}
 			}
-			
-			for(int j=0;j<BitmapPages.size();j++){
-				if(BitmapPages.get(j).equals(bitmappedCols.get(i))){
-					BitMapPage bp=readBitmapPage(pageNo,bitmappedCols.get(i));
-					Vector <BitmapObject> vec=bp.readTuples();
-					boolean first=true;
-					for(int k=0;k<vec.size();k++){
-						if(tupleToInsert.getAttributes().get(index).equals(vec.get(k).getColValue())){
-							found=true;
-							 String b = vec.get(k).getBitmap();
-							 StringBuilder str = new StringBuilder(b);
-							 System.out.println("Before=  "+str);
-								 str.insert(countRows+1, '1');
-							 System.out.println("After= "+str);
-							
-							 vec.get(k).setBitmap(str+"");
-							}
-						else{
-							 String b = vec.get(k).getBitmap();
-							 StringBuilder str = new StringBuilder(b);
-							 System.out.println(str); 
-								 str.insert(countRows+1, '0');
-							 
-								 System.out.println(str);
-							 vec.get(k).setBitmap(str+"");
+
+			for (int j = 0; j < BitmapPages.size(); j++) {
+				if (BitmapPages.get(j).equals(bitmappedCols.get(i))) {
+					BitMapPage bp = readBitmapPage(pageNo, bitmappedCols.get(i));
+					Vector<BitmapObject> vec = bp.readTuples();
+					boolean first = true;
+					for (int k = 0; k < vec.size(); k++) {
+						if (tupleToInsert.getAttributes().get(index).equals(vec.get(k).getColValue())) {
+							found = true;
+							String b = vec.get(k).getBitmap();
+							StringBuilder str = new StringBuilder(b);
+							System.out.println("Before=  " + str);
+							str.insert(countRows + 1, '1');
+							System.out.println("After= " + str);
+
+							vec.get(k).setBitmap(str + "");
+						} else {
+							String b = vec.get(k).getBitmap();
+							StringBuilder str = new StringBuilder(b);
+							System.out.println(str);
+							str.insert(countRows + 1, '0');
+
+							System.out.println(str);
+							vec.get(k).setBitmap(str + "");
+
 						}
 					}
-					this.writeBitmapPage(bp,pageNo,bitmappedCols.get(i));
+					this.writeBitmapPage(bp, pageNo, bitmappedCols.get(i));
 					pageNo++;
-					}
+				}
 			}
-			pageNo=0;
-			if(!found){
-				newObj=new BitmapObject(tupleToInsert.getAttributes().get(index),"");
+			pageNo = 0;
+			if (!found) {
+				newObj = new BitmapObject(tupleToInsert.getAttributes().get(index), "");
 				for (int n = 0; n < pages.size(); n++) { // loop over all pages
 					Vector currentTuples = readPage(n).readTuples();
-					
 
 					for (int j = 0; j < currentTuples.size(); j++) { // loop over all tuples per page
+
 						Tuple tuple = ((Tuple) currentTuples.get(j));
 						int colIndex = tuple.getColName().indexOf(bitmappedCols.get(i));
 						Object colValue = tuple.getAttributes().get(colIndex);
-							if (tupleToInsert.getAttributes().get(index).equals(colValue)) {
-								newObj.setBitmap(newObj.getBitmap() + "1");
-							} else {
-								newObj.setBitmap(newObj.getBitmap() + "0");
-							}
-							
+						if (tupleToInsert.getAttributes().get(index).equals(colValue)) {
+							newObj.setBitmap(newObj.getBitmap() + "1");
+						} else {
+							newObj.setBitmap(newObj.getBitmap() + "0");
+						}
+
 					}
 
 				}
@@ -791,10 +855,8 @@ int countRows=0;
 		}
 	}
 
-	public void createBitmapIndex(String strColName) throws DBAppException {
+	public ArrayList getUniqueValues(String strColName) {
 		ArrayList<BitmapObject> uniqueValues = new ArrayList<BitmapObject>();
-		bitmappedCols.add(strColName);
-		// Retrieved all unique values in column needed
 		for (int i = 0; i < pages.size(); i++) {
 			Vector currentTuples = readPage(i).readTuples();
 			for (int j = 0; j < currentTuples.size(); j++) {
@@ -813,6 +875,18 @@ int countRows=0;
 				}
 			}
 		}
+		return uniqueValues;
+	}
+
+	public void createBitmapIndex(String strColName) throws DBAppException {
+		ArrayList<BitmapObject> uniqueValues = new ArrayList<BitmapObject>();
+
+		this.updateMeta(strColName);
+
+		bitmappedCols.add(strColName);
+
+		// Retrieved all unique values in column needed
+		uniqueValues = getUniqueValues(strColName);
 		for (int i = 0; i < pages.size(); i++) { // loop over all pages
 			Vector currentTuples = readPage(i).readTuples();
 			for (int j = 0; j < currentTuples.size(); j++) { // loop over all tuples per page
@@ -871,12 +945,13 @@ int countRows=0;
 		}
 	}
 
-	public void shiftingPages(BitmapObject overFlowTuple, int index, String colName, ArrayList<String> temp,int startIndex) {
+	public void shiftingPages(BitmapObject overFlowTuple, int index, String colName, ArrayList<String> temp,
+			int startIndex) {
 		System.out.println(temp + "In Shift");
 		if (index >= temp.size()) {
 			int pageNo = temp.size();
 			BitMapPage currentPage = new BitMapPage();
-			BitmapPages.add(temp.size()+startIndex, colName);
+			BitmapPages.add(temp.size() + startIndex, colName);
 			temp.add(colName);
 			currentPage.addTuple(overFlowTuple);
 			writeBitmapPage(currentPage, index, colName);
@@ -891,7 +966,7 @@ int countRows=0;
 				currentPage.sort();
 				BitmapObject newOverFlow = (BitmapObject) currentPage.readTuples().remove(maxRows);
 				writeBitmapPage(currentPage, index, colName);
-				shiftingPages(newOverFlow, ++index, colName, temp,startIndex);
+				shiftingPages(newOverFlow, ++index, colName, temp, startIndex);
 			}
 
 		}
