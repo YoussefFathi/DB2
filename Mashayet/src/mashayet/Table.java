@@ -343,7 +343,7 @@ public class Table implements Serializable {
 			}
 
 		}
-
+int countRows=0;
 		Tuple tupleToDelete = new Tuple(attrs, key, colNames);
 		for (int i = 0; i < pages.size(); i++) {
 			currentPage = readPage(i);
@@ -353,16 +353,108 @@ public class Table implements Serializable {
 					tempVector.remove(j--);
 					if (tempVector.size() == 0 && i != pages.size() - 1) {
 						shiftPagesUp(i);
+						handleDelete(tupleToDelete,countRows);
+						countRows--;
 					} else if (!(tempVector.size() == 0) && i != pages.size() - 1) {
 						writePage(currentPage, i);
+						handleDelete(tupleToDelete,countRows);
+						countRows--;
 					} else if (tempVector.size() == 0 && i == pages.size() - 1) {
 						removePage(i);
+						handleDelete(tupleToDelete,countRows);
+						countRows--;
+
+					}
+				}
+				countRows++;
+			}
+		}
+	}
+
+	public void deleteBitMapObject(BitmapObject bo,String col) {
+		BitMapPage currentPage = null;
+		int pages=0;;
+		int key = -1;
+		for (int i = 0; i < BitmapPages.size(); i++) {
+			currentPage = readBitmapPage(i, col);
+			Vector<BitmapObject> tempVector = currentPage.readTuples();
+			if(BitmapPages.get(i).equals(col)){
+				pages++;
+			}
+			for (int j = 0; j < tempVector.size(); j++) {
+				if (tempVector.get(j).compareTo(bo) == 0) {
+					tempVector.remove(j--);
+					if (tempVector.size() == 0 && i != BitmapPages.size() - 1) {
+						shiftPagesUp(i);
+					} else if (!(tempVector.size() == 0) && i != BitmapPages.size() - 1) {
+						writeBitmapPage(currentPage,pages, col);
+					} else if (tempVector.size() == 0 && i == BitmapPages.size() - 1) {
+						bitMapremovePage(pages,col);
+
 					}
 				}
 			}
 		}
 	}
 
+	private void handleDelete(Tuple tupleToDelete, int countRows) {
+		int index=-1;
+		int pageNo=0;
+		for(int i=0;i<bitmappedCols.size();i++){
+			for(int k=0;k<tupleToDelete.getColName().size();k++){
+				if(tupleToDelete.getColName().get(k).equals(bitmappedCols.get(i))){
+					index=k;
+				}
+			}
+			
+			for(int j=0;j<BitmapPages.size();j++){
+				if(BitmapPages.get(j).equals(bitmappedCols.get(i))){
+					BitMapPage bp=readBitmapPage(pageNo,bitmappedCols.get(i));
+					Vector <BitmapObject> vec=bp.readTuples();
+					boolean first=true;
+					for(int k=0;k<vec.size();k++){
+						
+							 String b = vec.get(k).getBitmap();
+							 StringBuilder str = new StringBuilder(b);
+							 System.out.println("Before=  "+str);
+							str.deleteCharAt(countRows);
+							 System.out.println("After= "+str);
+							vec.get(k).setBitmap(str+"");
+							if(!vec.get(k).getBitmap().contains("1")){
+								deleteBitMapObject(vec.get(k), bitmappedCols.get(i));
+							}
+							
+						
+							 
+						
+					}
+					this.writeBitmapPage(bp,pageNo,bitmappedCols.get(i));
+					pageNo++;
+					}
+			}
+			pageNo=0;
+			}
+	}
+	public void bitMapremovePage(int pageNo,String col) {
+		int count =0;
+		int i=0;
+		for(;i<BitmapPages.size();i++){
+			if(BitmapPages.get(i).equals(col)){
+				count++;
+			}
+			if(count==pageNo)
+				break;
+		}
+		BitmapPages.remove(i);
+		if(!BitmapPages.contains(col)){
+			bitmappedCols.remove(col);
+		}
+		File toBeDeleted = new File(tableName + "B " +col+ pageNo + ".class");
+
+		if (toBeDeleted.delete()) {
+			System.out.println("File" + pageNo + "Deleted");
+		}
+	}
 	public void removePage(int pageNo) {
 		pages.remove(pageNo);
 		File toBeDeleted = new File(tableName + " P" + pageNo + ".class");
@@ -380,6 +472,18 @@ public class Table implements Serializable {
 			this.writePage(currentPage, i);
 		}
 		File toBeDeleted = new File(tableName + " P" + pages.size() + ".class");
+		if (toBeDeleted.delete()) {
+			System.out.println("File" + pages.size() + "Deleted");
+		}
+	}
+	public void shiftBitmapPagesUp(int startPage,String col) {
+		BitmapPages.remove(startPage);
+		for (int i = startPage;BitmapPages.get(i).equals(col) && i < BitmapPages.size(); i++) {
+//			BitmapPages.set(i,i);
+			BitMapPage currentPage = this.readBitmapPage(i + 1, col);
+			this.writeBitmapPage(currentPage, i, col);
+		}
+		File toBeDeleted = new File(tableName + "B" + pages.size() + ".class");
 		if (toBeDeleted.delete()) {
 			System.out.println("File" + pages.size() + "Deleted");
 		}
