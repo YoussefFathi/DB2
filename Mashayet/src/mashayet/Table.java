@@ -587,7 +587,7 @@ public class Table implements Serializable {
 					throw new DBAppException("Duplicate Insertion");
 				}
 				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
-					// bitmapHandleInsert(tupleToInsert, countRows);
+
 					if (j == 0 && i > 0) {
 						Page previousPage = readPage(i - 1);
 						previousPage.addTuple(tupleToInsert);
@@ -596,10 +596,10 @@ public class Table implements Serializable {
 							Tuple overFlowTuple = tempVector.remove(maxRows);
 							writePage(previousPage, i - 1);
 							shiftingPages(overFlowTuple, i - 1);
-
+							bitmapHandleInsert(tupleToInsert, countRows);
 						} else {
 							writePage(previousPage, i - 1);
-
+							bitmapHandleInsert(tupleToInsert, countRows);
 						}
 						return;
 					} else {
@@ -609,9 +609,12 @@ public class Table implements Serializable {
 							Tuple overFlowTuple = tempVector.remove(maxRows);
 							writePage(currentPage, i);
 							shiftingPages(overFlowTuple, ++i);
+							countRows--;
+							bitmapHandleInsert(tupleToInsert, countRows);
 
 						} else {
 							writePage(currentPage, i);
+							bitmapHandleInsert(tupleToInsert, countRows);
 
 						}
 					}
@@ -627,10 +630,16 @@ public class Table implements Serializable {
 		for (int j = 0; j < tempVector.size(); j++) {
 			if (tempVector.get(j).compareTo(tupleToInsert) == 2 || tempVector.get(j).compareTo(tupleToInsert) == 0) {
 				throw new DBAppException("Duplicate Insertion");
+			} else {
+				if (tempVector.get(j).compareTo(tupleToInsert) < 0) {
+					countRows++;
+				}
 			}
+
 		}
+		countRows--;
 		if (tempVector.size() == maxRows) {
-			// bitmapHandleInsert(tupleToInsert, countRows);
+
 			currentPage.addTuple(tupleToInsert);
 			currentPage.sort();
 			Tuple overFlow = tempVector.remove(maxRows);
@@ -639,20 +648,24 @@ public class Table implements Serializable {
 			pages.add(pages.size());
 			currentPage.addTuple(overFlow);
 			writePage(currentPage, pages.size() - 1);
+			bitmapHandleInsert(tupleToInsert, countRows);
 
 		} else {
 			if (currentPage.readTuples().size() > 0) {
-				// bitmapHandleInsert(tupleToInsert, countRows);
+
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
 				writePage(currentPage, pages.size() - 1);
+				bitmapHandleInsert(tupleToInsert, countRows);
 
 			} else {
-				// bitmapHandleInsert(tupleToInsert, countRows);
+
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
 				int num = 0;
 				writePage(currentPage, pages.size() - 1);
+				bitmapHandleInsert(tupleToInsert, countRows);
+
 			}
 		}
 	}
@@ -675,22 +688,31 @@ public class Table implements Serializable {
 
 				}
 			}
+
 			for (int j = 0; j < BitmapPages.size(); j++) {
 				if (BitmapPages.get(j).equals(bitmappedCols.get(i))) {
 					BitMapPage bp = readBitmapPage(pageNo, bitmappedCols.get(i));
 					Vector<BitmapObject> vec = bp.readTuples();
+					boolean first = true;
 					for (int k = 0; k < vec.size(); k++) {
-						if (tupleToInsert.getAttributes().get(index).equals(vec.get(k))) {
+						if (tupleToInsert.getAttributes().get(index).equals(vec.get(k).getColValue())) {
 							found = true;
 							String b = vec.get(k).getBitmap();
 							StringBuilder str = new StringBuilder(b);
-							str.insert(countRows, '1');
+							System.out.println("Before=  " + str);
+							str.insert(countRows + 1, '1');
+							System.out.println("After= " + str);
+
 							vec.get(k).setBitmap(str + "");
 						} else {
 							String b = vec.get(k).getBitmap();
 							StringBuilder str = new StringBuilder(b);
-							str.insert(countRows, '0');
+							System.out.println(str);
+							str.insert(countRows + 1, '0');
+
+							System.out.println(str);
 							vec.get(k).setBitmap(str + "");
+
 						}
 					}
 					this.writeBitmapPage(bp, pageNo, bitmappedCols.get(i));
