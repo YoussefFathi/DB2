@@ -32,6 +32,9 @@ public class BitmapObject implements Serializable, Comparable {
 	}
 	@Override
 	public int compareTo(Object BitObject) {
+		if(this.getColValue().equals(((BitmapObject) BitObject).getColValue())){
+			return 0;
+		}
 		try{
 			Double thisAttr=Double.parseDouble(""+colValue);
 			Double otherAttr=Double.parseDouble((""+((BitmapObject)BitObject).getColValue()));

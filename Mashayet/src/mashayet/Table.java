@@ -128,6 +128,7 @@ public class Table implements Serializable {
 	}
 
 	public void updateTuple(Object key, Hashtable<String, Object> htblColNameValue) {
+		int countRows = 0;
 		for (int i = 0; i < pages.size(); i++) {
 			Page tempPage = readPage(pages.get(i));
 			Vector tuples = tempPage.readTuples();
@@ -135,21 +136,49 @@ public class Table implements Serializable {
 				if (((Tuple) tuples.get(j)).getAttributes().contains(key)) {
 					ArrayList attrs = getArrayFromHash(htblColNameValue);
 					Tuple removed = (Tuple) tuples.remove(j);
+					handleDelete(removed,countRows);
+					countRows--;
 					// Tuple temp = new
 					// Tuple(removed.getAttributes(),removed.getKeyIndex(),removed.getColName());
 					// removed.setAttributes(attrs);
 					this.writePage(tempPage, i);
 					try {
 						insertSortedTuple(htblColNameValue);
+						ArrayList attrsTemp = new ArrayList(attrNo);
+						
+						ArrayList colNames = new ArrayList();
+						Set<String> names = htblColNameValue.keySet();
+						int keyTemp = -1;
+						for (String name : names) {
+
+							Object value = htblColNameValue.get(name);
+							// System.out.println(name +value);
+							if (checkType(name, value)) {
+
+								attrs.add(value);
+								colNames.add(name);
+								if (name.equals(tableKey)) {
+									key = attrs.size() - 1;
+								}
+							} else {
+								throw new DBAppException("Invalid Input " + name + " , " + value);
+							}
+
+						}
+
+						Tuple tupleToInsert = new Tuple(attrs, keyTemp, colNames);
+						bitmapHandleInsert(tupleToInsert,countRows);
 					} catch (DBAppException e) {
 						System.out.println(e.getMessage());
 						tuples.add(j, removed);
+						bitmapHandleInsert(removed,countRows);
 						this.writePage(tempPage, i);
 
 					}
 					readPage(i);
 					return;
 				}
+				countRows++;
 			}
 		}
 	}
@@ -351,7 +380,7 @@ public class Table implements Serializable {
 			}
 
 		}
-
+		int countRows = 0;
 		Tuple tupleToDelete = new Tuple(attrs, key, colNames);
 		for (int i = 0; i < pages.size(); i++) {
 			currentPage = readPage(i);
@@ -361,18 +390,115 @@ public class Table implements Serializable {
 					tempVector.remove(j--);
 					if (tempVector.size() == 0 && i != pages.size() - 1) {
 						shiftPagesUp(i);
+						handleDelete(tupleToDelete, countRows);
+						countRows--;
 					} else if (!(tempVector.size() == 0) && i != pages.size() - 1) {
 						writePage(currentPage, i);
+						handleDelete(tupleToDelete, countRows);
+						countRows--;
 						pages.set(i, currentPage.readTuples().size());
 					} else if (tempVector.size() == 0 && i == pages.size() - 1) {
 						removePage(i);
+						handleDelete(tupleToDelete, countRows);
+						countRows--;
 					} else {
 						writePage(currentPage, i);
 						pages.set(i, currentPage.readTuples().size());
+						handleDelete(tupleToDelete, countRows);
+						countRows--;
+					}
+
+				}
+				countRows++;
+			}
+
+		}
+
+	}
+
+	public void deleteBitMapObject(BitmapObject bo, String col) {
+		BitMapPage currentPage = null;
+		int pages = 0;
+		;
+		int key = -1;
+		for (int i = 0; i < BitmapPages.size(); i++) {
+			currentPage = readBitmapPage(i, col);
+			Vector<BitmapObject> tempVector = currentPage.readTuples();
+			if (BitmapPages.get(i).equals(col)) {
+				pages++;
+			}
+			for (int j = 0; j < tempVector.size(); j++) {
+				if (tempVector.get(j).compareTo(bo) == 0) {
+					tempVector.remove(j--);
+					if (tempVector.size() == 0 && i != BitmapPages.size() - 1) {
+						shiftPagesUp(i);
+					} else if (!(tempVector.size() == 0) && i != BitmapPages.size() - 1) {
+						writeBitmapPage(currentPage, pages, col);
+					} else if (tempVector.size() == 0 && i == BitmapPages.size() - 1) {
+						bitMapremovePage(pages, col);
+
+					}else {
+						writeBitmapPage(currentPage, pages, col);
 					}
 				}
 			}
+		}
+	}
 
+	private void handleDelete(Tuple tupleToDelete, int countRows) {
+		int index = -1;
+		int pageNo = 0;
+		for (int i = 0; i < bitmappedCols.size(); i++) {
+			for (int k = 0; k < tupleToDelete.getColName().size(); k++) {
+				if (tupleToDelete.getColName().get(k).equals(bitmappedCols.get(i))) {
+					index = k;
+				}
+			}
+
+			for (int j = 0; j < BitmapPages.size(); j++) {
+				if (BitmapPages.get(j).equals(bitmappedCols.get(i))) {
+					BitMapPage bp = readBitmapPage(pageNo, bitmappedCols.get(i));
+					Vector<BitmapObject> vec = bp.readTuples();
+					boolean first = true;
+					for (int k = 0; k < vec.size(); k++) {
+
+						String b = vec.get(k).getBitmap();
+						StringBuilder str = new StringBuilder(b);
+						System.out.println("Before=  " + str);
+						str.deleteCharAt(countRows);
+						System.out.println("After= " + str);
+						vec.get(k).setBitmap(str + "");
+						if (!vec.get(k).getBitmap().contains("1")) {
+							deleteBitMapObject(vec.get(k), bitmappedCols.get(i));
+						}
+
+					}
+					this.writeBitmapPage(bp, pageNo, bitmappedCols.get(i));
+					pageNo++;
+				}
+			}
+			pageNo = 0;
+		}
+	}
+
+	public void bitMapremovePage(int pageNo, String col) {
+		int count = 0;
+		int i = 0;
+		for (; i < BitmapPages.size(); i++) {
+			if (BitmapPages.get(i).equals(col)) {
+				count++;
+			}
+			if (count == pageNo)
+				break;
+		}
+		BitmapPages.remove(i);
+		if (!BitmapPages.contains(col)) {
+			bitmappedCols.remove(col);
+		}
+		File toBeDeleted = new File(tableName + "B " + col + pageNo + ".class");
+
+		if (toBeDeleted.delete()) {
+			System.out.println("File" + pageNo + "Deleted");
 		}
 	}
 
@@ -393,6 +519,19 @@ public class Table implements Serializable {
 			this.writePage(currentPage, i);
 		}
 		File toBeDeleted = new File(tableName + " P" + pages.size() + ".class");
+		if (toBeDeleted.delete()) {
+			System.out.println("File" + pages.size() + "Deleted");
+		}
+	}
+
+	public void shiftBitmapPagesUp(int startPage, String col) {
+		BitmapPages.remove(startPage);
+		for (int i = startPage; BitmapPages.get(i).equals(col) && i < BitmapPages.size(); i++) {
+			// BitmapPages.set(i,i);
+			BitMapPage currentPage = this.readBitmapPage(i + 1, col);
+			this.writeBitmapPage(currentPage, i, col);
+		}
+		File toBeDeleted = new File(tableName + "B" + pages.size() + ".class");
 		if (toBeDeleted.delete()) {
 			System.out.println("File" + pages.size() + "Deleted");
 		}
@@ -1048,13 +1187,13 @@ public class Table implements Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return false;
-//		if (BitmapPages.contains(colName)) {
-//			return true;
-//		} else {
-//			return false;
-//		}
+		// if (BitmapPages.contains(colName)) {
+		// return true;
+		// } else {
+		// return false;
+		// }
 	}
 
 	public static void main(String[] args) {

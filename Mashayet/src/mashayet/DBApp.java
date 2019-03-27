@@ -251,12 +251,20 @@ public class DBApp {
 			// htblColNameValue.put("id", new Integer(2343432));
 			htblColNameValue.put("name", new String("Ahmed Noor"));
 			htblColNameValue.put("gpa", new Double(0.95));
-			// app.deleteFromTable(strTableName, htblColNameValue);
+
+			app.printing(app);
+			app.deleteFromTable(strTableName, htblColNameValue);
+			System.out.println("*************************************************************************");
+			app.printing(app);
+
 			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(453455));
 			htblColNameValue.put("name", new String("Ahmed Noor"));
 			htblColNameValue.put("gpa", new Double(0.95));
-			// app.deleteFromTable(strTableName, htblColNameValue);
+
+			app.deleteFromTable(strTableName, htblColNameValue);
+			app.printing(app);
+
 			// htblColNameValue.clear();
 			// htblColNameValue.put("id", new Integer(5674567));
 			// htblColNameValue.put("name", new String("Dalia Noor"));
