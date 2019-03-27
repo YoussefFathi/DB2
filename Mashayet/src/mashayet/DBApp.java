@@ -203,7 +203,7 @@ public class DBApp {
 			app.createTable(strTableName, "id", htblColNameType);
 			Hashtable htblColNameValue = new Hashtable();
 			// app.createBitmapIndex(strTableName, "name");
-			// app.createBitmapIndex(strTableName, "gpa");
+			 app.createBitmapIndex(strTableName, "gpa");
 			app.createBitmapIndex(strTableName, "id");
 			htblColNameValue.put("id", new Integer(2343432));
 			htblColNameValue.put("name", new String("Ahmed Noor"));
@@ -324,14 +324,14 @@ public class DBApp {
 			// htblColNameValue.put("id", new Integer(784352));
 			// htblColNameValue.put("name", new String("Dalaia Noor"));
 			htblColNameValue.put("gpa", new Double(11.0));
-			app.deleteFromTable(strTableName, htblColNameValue);
+//			app.deleteFromTable(strTableName, htblColNameValue);
 			app.printing(app);
 
 			System.out.println("************************");
 			SQLTerm[] arrSQLTerms;
 			arrSQLTerms = new SQLTerm[2];
-			arrSQLTerms[0] = new SQLTerm("Student", "gpa", ">", "1.0");
-			arrSQLTerms[1] = new SQLTerm("Student", "name", "=", "John Noor");
+			arrSQLTerms[0] = new SQLTerm("Student", "gpa", "<", "1.0");
+			arrSQLTerms[1] = new SQLTerm("Student", "name", "<", "John Noor");
 			// arrSQLTerms[0]._strTableName = "Student";
 			// arrSQLTerms[0]._strColumnName= "name";
 			// arrSQLTerms[0]._strOperator = "=";

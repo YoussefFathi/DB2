@@ -1017,23 +1017,44 @@ public class Table implements Serializable {
 		for (int i = 0; i < pages.size(); i++) { // loop over all pages
 			Vector<Tuple> currentTuples = readPage(i).readTuples();
 			for (int j = 0; j < currentTuples.size(); j++) { // loop over all tuples per page
-				if(temp.charAt(index)=='1') {
+				if (temp.charAt(index) == '1') {
 					result.add(currentTuples.get(j));
 				}
 				index++;
 			}
-			
+
 		}
 		return result;
 	}
 
 	public boolean isIndexed(String colName) {
 		// TODO Auto-generated method stub
-		if (BitmapPages.contains(colName)) {
-			return true;
-		} else {
-			return false;
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File("./data/metaData.csv")));
+			reader.readLine();
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				String[] parts = line.split(",");
+				if ((colName.equals(parts[1]))) {
+					if (parts[parts.length - 1].equals("TRUE")) {
+						return true;
+					}
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+		return false;
+//		if (BitmapPages.contains(colName)) {
+//			return true;
+//		} else {
+//			return false;
+//		}
 	}
 
 	public static void main(String[] args) {
