@@ -416,29 +416,30 @@ public class Table implements Serializable {
 
 	}
 
-	public void deleteBitMapObject(BitmapObject bo,String col) {
+	public void deleteBitMapObject(BitmapObject bo, String col) {
 		BitMapPage currentPage = null;
-		int pages=0;;
+		int pages = 0;
+		;
 		int key = -1;
 		for (int i = 0; i < BitmapPages.size(); i++) {
-			System.out.println("TO be read: "+col+ " "+pages);
+			System.out.println("TO be read: " + col + " " + pages);
 			currentPage = readBitmapPage(pages, col);
 			Vector<BitmapObject> tempVector = currentPage.readTuples();
-			if(BitmapPages.get(i).equals(col)){
+			if (BitmapPages.get(i).equals(col)) {
 				pages++;
 			}
 			for (int j = 0; j < tempVector.size(); j++) {
 				if (tempVector.get(j).compareTo(bo) == 0) {
-					System.out.println(tempVector.size()+" TO BE DELETED:"+tempVector.get(j).toString());
+					System.out.println(tempVector.size() + " TO BE DELETED:" + tempVector.get(j).toString());
 					tempVector.remove(j--);
 					if (tempVector.size() == 0 && i != BitmapPages.size() - 1) {
 						shiftPagesUp(i);
 					} else if (!(tempVector.size() == 0) && i != BitmapPages.size() - 1) {
-						System.out.println("AFTER:"+col+ " "+ (pages-1));
+						System.out.println("AFTER:" + col + " " + (pages - 1));
 						System.out.println(tempVector.size());
-						writeBitmapPage(currentPage,pages-1, col);
+						writeBitmapPage(currentPage, pages - 1, col);
 					} else if (tempVector.size() == 0 && i == BitmapPages.size() - 1) {
-						bitMapremovePage(pages-1,col);
+						bitMapremovePage(pages - 1, col);
 
 					}
 					return;
@@ -468,7 +469,7 @@ public class Table implements Serializable {
 					BitMapPage bp = readBitmapPage(pageNo, bitmappedCols.get(i));
 					Vector<BitmapObject> vec = bp.readTuples();
 					boolean first = true;
-					for (int k = 0; k < vec.size() &&k>=0 ; k++) {
+					for (int k = 0; k < vec.size() && k >= 0; k++) {
 
 						String b = vec.get(k).getBitmap();
 						StringBuilder str = new StringBuilder(b);
@@ -494,11 +495,11 @@ public class Table implements Serializable {
 
 						}
 					}
-					if (shouldWrite){
+					if (shouldWrite) {
 						this.writeBitmapPage(bp, pageNo, bitmappedCols.get(i));
 						pageNo++;
 					}
-						shouldWrite = true;
+					shouldWrite = true;
 				}
 			}
 			pageNo = 0;
@@ -520,7 +521,7 @@ public class Table implements Serializable {
 		if (!BitmapPages.contains(col)) {
 			bitmappedCols.remove(col);
 		}
-		File toBeDeleted = new File("./data/"+tableName + "B " + col + pageNo + ".class");
+		File toBeDeleted = new File("./data/" + tableName + "B " + col + pageNo + ".class");
 
 		if (toBeDeleted.delete()) {
 			System.out.println("File" + pageNo + "Deleted");
@@ -969,16 +970,16 @@ public class Table implements Serializable {
 
 	public void shiftBitmapPagesUp(int index, int startPage, String col) {
 		BitmapPages.remove(index);
-		for (int i = index;i < BitmapPages.size()&& BitmapPages.get(i).equals(col) ; i++) {
+		for (int i = index; i < BitmapPages.size() && BitmapPages.get(i).equals(col); i++) {
 			// BitmapPages.set(i,i);
 			System.out.println(startPage + 1 + " test" + col);
-			
+
 			BitMapPage currentPage = this.readBitmapPage(startPage + 1, col);
 			this.writeBitmapPage(currentPage, startPage, col);
 			startPage++;
 		}
-		System.out.println(col+ "" +startPage);
-	File toBeDeleted = new File("./data/"+tableName + "B " + col + startPage + ".class");
+		System.out.println(col + "" + startPage);
+		File toBeDeleted = new File("./data/" + tableName + "B " + col + startPage + ".class");
 		System.out.println(toBeDeleted.exists());
 		if (toBeDeleted.delete()) {
 			System.out.println("File" + startPage + "Deleted");
@@ -1275,7 +1276,55 @@ public class Table implements Serializable {
 		// }
 	}
 
+	public static String compressArray(String numString) {
+		String finalData = "";
+		char[] num = numString.toCharArray();
+		int zeroCount = 0;
+		boolean zeroCheck = false;
+
+		for (int i = 0; i < num.length; i++) {
+			if (num[i] == '1' ) {
+				if (zeroCheck == true) {
+					if (zeroCount == 1)
+						finalData = finalData + '0' + ":";
+					else
+						finalData = finalData + zeroCount + ":";
+					zeroCount = 0;
+					zeroCheck = false;
+				}
+				finalData = finalData + num[i] + ":";
+			} else {
+				zeroCount++;
+				zeroCheck = true;
+			}
+
+		}
+//		finalData = finalData + zeroCount + ":";
+		return finalData;
+
+	}
+
+	public static String decompressArray(String compNum) {
+		String[] parts = compNum.split(":");
+		String tempResult = "";
+
+		for (int i = 0; i < parts.length; i++) {
+			int tempInt = Integer.parseInt(parts[i]);
+			if (tempInt == 1|| tempInt==0) {
+				tempResult = tempResult + tempInt;
+			} else {
+				for (int k = 0; k < tempInt; k++) {
+					tempResult = tempResult + 0;
+				}
+			}
+		}
+		return tempResult;
+	}
+
 	public static void main(String[] args) {
+		String text = "0000000";
+		System.out.println(compressArray(text));
+		System.out.println(decompressArray(compressArray(text)));
 	}
 
 }

@@ -195,17 +195,17 @@ public class DBApp {
 		htblColNameType2.put("gpa2", "java.lang.Double");
 		DBApp app = new DBApp();
 		try {
-			app.createTable(strTableName2, "name2", htblColNameType2);
+//			app.createTable(strTableName2, "name2", htblColNameType2);
 			Hashtable htblColNameValue2 = new Hashtable();
 			htblColNameValue2.put("id2", new Integer(2343432));
 			htblColNameValue2.put("name2", new String("Youssef Fathi"));
 			htblColNameValue2.put("gpa2", new Double(0.95));
 			app.insertIntoTable(strTableName2, htblColNameValue2);
-			app.createTable(strTableName, "id", htblColNameType);
+//			app.createTable(strTableName, "id", htblColNameType);
 			Hashtable htblColNameValue = new Hashtable();
-			app.createBitmapIndex(strTableName, "name");
-			app.createBitmapIndex(strTableName, "gpa");
-			app.createBitmapIndex(strTableName, "id");
+//			app.createBitmapIndex(strTableName, "name");
+//			app.createBitmapIndex(strTableName, "gpa");
+//			app.createBitmapIndex(strTableName, "id");
 			htblColNameValue.put("id", new Integer(2343432));
 			htblColNameValue.put("name", new String("Ahmed Noor"));
 			htblColNameValue.put("gpa", new Double(0.95));
@@ -333,11 +333,11 @@ public class DBApp {
 			htblColNameValue.put("name", new String("Zaky Noor"));
 			app.deleteFromTable(strTableName, htblColNameValue);
 			htblColNameValue.clear();
-
-			// htblColNameValue.put("gpa", new Double(11.0)); // TRY FIRST WITH COMMENTS
+///////////////////////////////////////////////////////////
+//			 htblColNameValue.put("gpa", new Double(11.0)); // TRY FIRST WITH COMMENTS
 			// THEN COMPARE WITH RESULT AFTER REMOVING COMMENTS
 
-			// app.deleteFromTable(strTableName, htblColNameValue);
+//			 app.deleteFromTable(strTableName, htblColNameValue);
 			// app.deleteFromTable(strTableName, htblColNameValue);
 			app.printing(app);
 
