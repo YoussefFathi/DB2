@@ -432,37 +432,48 @@ int countRows=0;
 		int pages=0;;
 		int key = -1;
 		for (int i = 0; i < BitmapPages.size(); i++) {
-			currentPage = readBitmapPage(i, col);
+			System.out.println("TO be read: "+col+ " "+pages);
+			currentPage = readBitmapPage(pages, col);
 			Vector<BitmapObject> tempVector = currentPage.readTuples();
 			if(BitmapPages.get(i).equals(col)){
 				pages++;
 			}
 			for (int j = 0; j < tempVector.size(); j++) {
 				if (tempVector.get(j).compareTo(bo) == 0) {
+					System.out.println(tempVector.size()+" TO BE DELETED:"+tempVector.get(j).toString());
 					tempVector.remove(j--);
 					if (tempVector.size() == 0 && i != BitmapPages.size() - 1) {
 						shiftPagesUp(i);
 					} else if (!(tempVector.size() == 0) && i != BitmapPages.size() - 1) {
-						writeBitmapPage(currentPage,pages, col);
+						System.out.println("AFTER:"+col+ " "+ (pages-1));
+						System.out.println(tempVector.size());
+						writeBitmapPage(currentPage,pages-1, col);
 					} else if (tempVector.size() == 0 && i == BitmapPages.size() - 1) {
-						bitMapremovePage(pages,col);
+						bitMapremovePage(pages-1,col);
 
 					}
+					return;
 				}
 			}
 		}
 	}
 
 	private void handleDelete(Tuple tupleToDelete, int countRows) {
+		boolean shouldWrite=true;
 		int index=-1;
 		int pageNo=0;
+		int maxCol=-1;
 		for(int i=0;i<bitmappedCols.size();i++){
 			for(int k=0;k<tupleToDelete.getColName().size();k++){
 				if(tupleToDelete.getColName().get(k).equals(bitmappedCols.get(i))){
 					index=k;
 				}
 			}
-			
+			for(int c=0;c<BitmapPages.size();c++){
+				if(bitmappedCols.get(i).equals(BitmapPages.get(c))){
+					maxCol++;
+				}
+			}
 			for(int j=0;j<BitmapPages.size();j++){
 				if(BitmapPages.get(j).equals(bitmappedCols.get(i))){
 					BitMapPage bp=readBitmapPage(pageNo,bitmappedCols.get(i));
@@ -477,18 +488,29 @@ int countRows=0;
 							 System.out.println("After= "+str);
 							vec.get(k).setBitmap(str+"");
 							if(!vec.get(k).getBitmap().contains("1")){
-								deleteBitMapObject(vec.get(k), bitmappedCols.get(i));
+								vec.remove(k);
+								if(vec.size()==0){
+									if(pageNo==maxCol){
+										bitMapremovePage(pageNo,bitmappedCols.get(i));
+									}
+									else{
+										shiftBitmapPagesUp(j, pageNo, bitmappedCols.get(i));
+										shouldWrite=false;
+
+									}
+								}
+//								deleteBitMapObject(vec.get(k), bitmappedCols.get(i));
+								
+							} 
 							}
-							
-						
-							 
-						
-					}
+					if(shouldWrite)
 					this.writeBitmapPage(bp,pageNo,bitmappedCols.get(i));
+					shouldWrite=true;
 					pageNo++;
 					}
 			}
 			pageNo=0;
+			maxCol=-1;
 			}
 	}
 	public void bitMapremovePage(int pageNo,String col) {
@@ -532,16 +554,18 @@ int countRows=0;
 			System.out.println("File" + pages.size() + "Deleted");
 		}
 	}
-	public void shiftBitmapPagesUp(int startPage,String col) {
-		BitmapPages.remove(startPage);
-		for (int i = startPage;BitmapPages.get(i).equals(col) && i < BitmapPages.size(); i++) {
+	public void shiftBitmapPagesUp(int index, int startPage,String col) {
+		BitmapPages.remove(index);
+		for (int i = index;BitmapPages.get(i).equals(col) && i < BitmapPages.size(); i++) {
 //			BitmapPages.set(i,i);
-			BitMapPage currentPage = this.readBitmapPage(i + 1, col);
-			this.writeBitmapPage(currentPage, i, col);
+			System.out.println(startPage+1+" test"+ col);
+			BitMapPage currentPage = this.readBitmapPage(startPage + 1, col);
+			this.writeBitmapPage(currentPage, startPage, col);
+			startPage++;
 		}
-		File toBeDeleted = new File(tableName + "B" + pages.size() + ".class");
+		File toBeDeleted = new File(tableName + "B "+col + startPage + ".class");
 		if (toBeDeleted.delete()) {
-			System.out.println("File" + pages.size() + "Deleted");
+			System.out.println("File" + startPage + "Deleted");
 		}
 	}
 

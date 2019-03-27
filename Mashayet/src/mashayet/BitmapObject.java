@@ -77,4 +77,8 @@ public String orBitmap(BitmapObject bo){
 	}
 	return result;
 }
+public String toString(){
+	return colValue+": "+bitmap;
+	
+}
 }
