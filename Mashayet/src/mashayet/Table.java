@@ -468,7 +468,7 @@ public class Table implements Serializable {
 					BitMapPage bp = readBitmapPage(pageNo, bitmappedCols.get(i));
 					Vector<BitmapObject> vec = bp.readTuples();
 					boolean first = true;
-					for (int k = 0; k < vec.size(); k++) {
+					for (int k = 0; k < vec.size() &&k>=0 ; k++) {
 
 						String b = vec.get(k).getBitmap();
 						StringBuilder str = new StringBuilder(b);
@@ -478,23 +478,27 @@ public class Table implements Serializable {
 						vec.get(k).setBitmap(str + "");
 						if (!vec.get(k).getBitmap().contains("1")) {
 							vec.remove(k);
+							k--;
 							if (vec.size() == 0) {
 								if (pageNo == maxCol) {
 									bitMapremovePage(pageNo, bitmappedCols.get(i));
 								} else {
 									shiftBitmapPagesUp(j, pageNo, bitmappedCols.get(i));
+									j--;
 									shouldWrite = false;
 
 								}
+								k--;
 							}
 							// deleteBitMapObject(vec.get(k), bitmappedCols.get(i));
 
 						}
 					}
-					if (shouldWrite)
+					if (shouldWrite){
 						this.writeBitmapPage(bp, pageNo, bitmappedCols.get(i));
-					shouldWrite = true;
-					pageNo++;
+						pageNo++;
+					}
+						shouldWrite = true;
 				}
 			}
 			pageNo = 0;
@@ -516,7 +520,7 @@ public class Table implements Serializable {
 		if (!BitmapPages.contains(col)) {
 			bitmappedCols.remove(col);
 		}
-		File toBeDeleted = new File(tableName + "B " + col + pageNo + ".class");
+		File toBeDeleted = new File("./data/"+tableName + "B " + col + pageNo + ".class");
 
 		if (toBeDeleted.delete()) {
 			System.out.println("File" + pageNo + "Deleted");
@@ -965,14 +969,17 @@ public class Table implements Serializable {
 
 	public void shiftBitmapPagesUp(int index, int startPage, String col) {
 		BitmapPages.remove(index);
-		for (int i = index; BitmapPages.get(i).equals(col) && i < BitmapPages.size(); i++) {
+		for (int i = index;i < BitmapPages.size()&& BitmapPages.get(i).equals(col) ; i++) {
 			// BitmapPages.set(i,i);
 			System.out.println(startPage + 1 + " test" + col);
+			
 			BitMapPage currentPage = this.readBitmapPage(startPage + 1, col);
 			this.writeBitmapPage(currentPage, startPage, col);
 			startPage++;
 		}
-		File toBeDeleted = new File(tableName + "B " + col + startPage + ".class");
+		System.out.println(col+ "" +startPage);
+	File toBeDeleted = new File("./data/"+tableName + "B " + col + startPage + ".class");
+		System.out.println(toBeDeleted.exists());
 		if (toBeDeleted.delete()) {
 			System.out.println("File" + startPage + "Deleted");
 		}
