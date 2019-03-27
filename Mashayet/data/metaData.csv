@@ -22,11 +22,3 @@ Table Name, Column Name, Column Type, Key,Indexed
 Student,id,java.lang.Integer,True,TRUE
 Student,name,java.lang.String,False,TRUE
 Student,gpa,java.lang.Double,False,TRUE
-Table Name, Column Name, Column Type, Key,Indexed 
-Admin,name2,java.lang.String,True,False
-Admin,id2,java.lang.Integer,False,False
-Admin,gpa2,java.lang.Double,False,False
-Table Name, Column Name, Column Type, Key,Indexed 
-Student,id,java.lang.Integer,True,TRUE
-Student,name,java.lang.String,False,TRUE
-Student,gpa,java.lang.Double,False,TRUE
