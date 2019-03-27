@@ -436,8 +436,7 @@ public class Table implements Serializable {
 						writeBitmapPage(currentPage, pages, col);
 					} else if (tempVector.size() == 0 && i == BitmapPages.size() - 1) {
 						bitMapremovePage(pages, col);
-
-					} else {
+				} else {
 						writeBitmapPage(currentPage, pages, col);
 					}
 				}
@@ -1149,30 +1148,31 @@ public class Table implements Serializable {
 		}
 		return result;
 	}
-//	public static int binarySearch(BitmapObject x) 
-//	    { 
-//		for(int i=0;i<BitmappedPages.) {
-//	        int l = 0, r = arr.length - 1; 
-//	        while (l <= r) { 
-//	            int m = l + (r - l) / 2; 
-//	  
-//	            // Check if x is present at mid 
-//	            if (arr[m] == x) 
-//	                return m; 
-//	  
-//	            // If x greater, ignore left half 
-//	            if (arr[m] < x) 
-//	                l = m + 1; 
-//	  
-//	            // If x is smaller, ignore right half 
-//	            else
-//	                r = m - 1; 
-//	        } 
-//	  
-//	        // if we reach here, then element was 
-//	        // not present 
-//	        return -1; 
-//	    } 
+
+	// public static int binarySearch(BitmapObject x)
+	// {
+	// for(int i=0;i<BitmappedPages.) {
+	// int l = 0, r = arr.length - 1;
+	// while (l <= r) {
+	// int m = l + (r - l) / 2;
+	//
+	// // Check if x is present at mid
+	// if (arr[m] == x)
+	// return m;
+	//
+	// // If x greater, ignore left half
+	// if (arr[m] < x)
+	// l = m + 1;
+	//
+	// // If x is smaller, ignore right half
+	// else
+	// r = m - 1;
+	// }
+	//
+	// // if we reach here, then element was
+	// // not present
+	// return -1;
+	// }
 	public Vector<Tuple> getVectorResult(String temp) {
 		int index = 0;
 		Vector<Tuple> result = new Vector<Tuple>();

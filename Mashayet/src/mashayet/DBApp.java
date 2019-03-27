@@ -240,7 +240,9 @@ public class DBApp {
 			htblColNameValue.put("id", new Integer(78452));
 			htblColNameValue.put("name", new String("Zaky Ypussef Fathi"));
 			htblColNameValue.put("gpa", new Double(1));
+
 			// app.updateTable(strTableName, new Integer(78452), htblColNameValue);
+
 			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(78452));
 			htblColNameValue.put("name", new String("Zaky Noor"));
@@ -306,12 +308,16 @@ public class DBApp {
 			htblColNameValue.put("id", new Integer(784));
 			htblColNameValue.put("name", new String("Zaky bo2loz Youssef"));
 			htblColNameValue.put("gpa", new Integer(7));
+
 			// app.updateTable(strTableName, new Integer(7843544), htblColNameValue);
+
 			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(784));
 			htblColNameValue.put("name", new String("Zaky bo2loz Youssef2"));
 			htblColNameValue.put("gpa", new Double(7));
+
 			// app.updateTable(strTableName, new Integer(784353), htblColNameValue);
+
 
 			htblColNameValue.clear();
 
@@ -323,17 +329,20 @@ public class DBApp {
 			// app.createBitmapIndex(strTableName, "gpa");
 			// app.createBitmapIndex(strTableName, "id");
 
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(567456127));
-			htblColNameValue.put("name", new String("Dalaia Noor"));
-			htblColNameValue.put("gpa", new Double(1.25));
-			app.insertIntoTable(strTableName, htblColNameValue);
-			htblColNameValue.clear();
-			// htblColNameValue.put("id", new Integer(784352));
-			// htblColNameValue.put("name", new String("Dalaia Noor"));
-			htblColNameValue.put("gpa", new Double(11.0));
-//			app.deleteFromTable(strTableName, htblColNameValue);
-			app.printing(app);
+
+			 htblColNameValue.clear();
+			 htblColNameValue.put("id", new Integer(567456127));
+			 htblColNameValue.put("name", new String("Dalaia Noor"));
+			 htblColNameValue.put("gpa", new Double(1.25));
+			 app.insertIntoTable(strTableName, htblColNameValue);
+			 app.printing(app);
+			 htblColNameValue.clear();
+			 htblColNameValue.put("name", new String("Zaky Noor"));
+			 app.deleteFromTable(strTableName, htblColNameValue);
+			 app.printing(app);
+
+			 
+
 
 			System.out.println("************************");
 			SQLTerm[] arrSQLTerms;
@@ -350,6 +359,22 @@ public class DBApp {
 			while(resultSet.hasNext()) {
 				System.out.println(resultSet.next());
 			}
+
+//			boolean found = false;
+//			int first = 0;
+//			System.out.println(t.getBitmapPages());
+//			for (int i = 0; i < t.getBitmapPages().size(); i++) {
+//				if ((t.getBitmapPages().get(i)).equals("gpa") && !found) {
+//					first = i;
+//					found = true;
+//				} else if (found && !((t.getBitmapPages().get(i)).equals("gpa"))) {
+//					break;
+//				}
+//				System.out.println("BitMapPage :" + (i - first));
+//				t.readBitmapPage(i - first, "gpa");
+//			}
+			
+
 		} catch (DBAppException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
