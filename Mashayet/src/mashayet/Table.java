@@ -386,11 +386,13 @@ public class Table implements Serializable {
 			currentPage = readPage(i);
 			Vector<Tuple> tempVector = currentPage.readTuples();
 			for (int j = 0; j < tempVector.size(); j++) {
+				System.out.println(tempVector.get(j)+"  COMPARED WITH: "+tupleToDelete);
 				if (tempVector.get(j).compareTo(tupleToDelete) == 0) {
 					tempVector.remove(j--);
 					if (tempVector.size() == 0 && i != pages.size() - 1) {
 						shiftPagesUp(i);
 						handleDelete(tupleToDelete, countRows);
+						i--;
 						countRows--;
 					} else if (!(tempVector.size() == 0) && i != pages.size() - 1) {
 						writePage(currentPage, i);

@@ -333,11 +333,13 @@ public class DBApp {
 			htblColNameValue.put("name", new String("Zaky Noor"));
 			app.deleteFromTable(strTableName, htblColNameValue);
 			htblColNameValue.clear();
-///////////////////////////////////////////////////////////
-//			 htblColNameValue.put("gpa", new Double(11.0)); // TRY FIRST WITH COMMENTS
+
+
+			 htblColNameValue.put("gpa", new Double(11.0)); // TRY FIRST WITH COMMENTS
 			// THEN COMPARE WITH RESULT AFTER REMOVING COMMENTS
 
-//			 app.deleteFromTable(strTableName, htblColNameValue);
+			 app.deleteFromTable(strTableName, htblColNameValue);
+
 			// app.deleteFromTable(strTableName, htblColNameValue);
 			app.printing(app);
 
