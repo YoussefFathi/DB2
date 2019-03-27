@@ -130,11 +130,11 @@ public class Table implements Serializable {
 	public void updateTuple(Object key, Hashtable<String, Object> htblColNameValue) {
 		int countRows = 0;
 		for (int i = 0; i < pages.size(); i++) {
-			Page tempPage = readPage(pages.get(i));
+			Page tempPage = readPage(i);
 			Vector tuples = tempPage.readTuples();
 			for (int j = 0; j < tuples.size(); j++) {
 				if (((Tuple) tuples.get(j)).getAttributes().contains(key)) {
-					ArrayList attrs = getArrayFromHash(htblColNameValue);
+					ArrayList attrs = new ArrayList();
 					Tuple removed = (Tuple) tuples.remove(j);
 					handleDelete(removed, countRows);
 					countRows--;
@@ -143,7 +143,7 @@ public class Table implements Serializable {
 					// removed.setAttributes(attrs);
 					this.writePage(tempPage, i);
 					try {
-						insertSortedTuple(htblColNameValue);
+
 						ArrayList attrsTemp = new ArrayList(attrNo);
 
 						ArrayList colNames = new ArrayList();
@@ -165,7 +165,18 @@ public class Table implements Serializable {
 							}
 
 						}
-
+						if (colNames.size() < removed.getColName().size()) { // To leave the unupdated column values as
+																				// is
+							for (int k = 0; k < removed.getColName().size()-1; k++) {
+								if (!(colNames.contains(removed.getColName().get(k))&&!(removed.getColName().get(k).equals("TouchDate")))) {
+									colNames.add(removed.getColName().get(k));
+									attrs.add(removed.getAttributes().get(k));
+									htblColNameValue.put((String) removed.getColName().get(k), removed.getAttributes().get(k));
+								}
+							}
+						}
+						insertSortedTuple(htblColNameValue);
+						countRows++;
 						Tuple tupleToInsert = new Tuple(attrs, keyTemp, colNames);
 						bitmapHandleInsert(tupleToInsert, countRows);
 					} catch (DBAppException e) {
@@ -386,7 +397,7 @@ public class Table implements Serializable {
 			currentPage = readPage(i);
 			Vector<Tuple> tempVector = currentPage.readTuples();
 			for (int j = 0; j < tempVector.size(); j++) {
-				System.out.println(tempVector.get(j)+"  COMPARED WITH: "+tupleToDelete);
+				System.out.println(tempVector.get(j) + "  COMPARED WITH: " + tupleToDelete);
 				if (tempVector.get(j).compareTo(tupleToDelete) == 0) {
 					tempVector.remove(j--);
 					if (tempVector.size() == 0 && i != pages.size() - 1) {
@@ -1036,9 +1047,7 @@ public class Table implements Serializable {
 			if (BitmapPages.get(i).equals(colName) && !found) {
 				first = i;
 				found = true;
-			} else if (found && !((BitmapPages.get(i)).equals(colName))) {
-				break;
-			}
+			
 			BitMapPage currentPage = readBitmapPage(i - first, colName);
 			Vector<BitmapObject> vec = currentPage.readTuples();
 			for (int j = 0; j < vec.size(); j++) {
@@ -1095,6 +1104,9 @@ public class Table implements Serializable {
 					throw new DBAppException("Invalid op");
 				}
 
+			}
+			} else if (found && !((BitmapPages.get(i)).equals(colName))) {
+				break;
 			}
 		}
 		if (!columnNames.contains(colName)) {
@@ -1285,7 +1297,7 @@ public class Table implements Serializable {
 		boolean zeroCheck = false;
 
 		for (int i = 0; i < num.length; i++) {
-			if (num[i] == '1' ) {
+			if (num[i] == '1') {
 				if (zeroCheck == true) {
 					if (zeroCount == 1)
 						finalData = finalData + '0' + ":";
@@ -1301,7 +1313,7 @@ public class Table implements Serializable {
 			}
 
 		}
-//		finalData = finalData + zeroCount + ":";
+		// finalData = finalData + zeroCount + ":";
 		return finalData;
 
 	}
@@ -1312,7 +1324,7 @@ public class Table implements Serializable {
 
 		for (int i = 0; i < parts.length; i++) {
 			int tempInt = Integer.parseInt(parts[i]);
-			if (tempInt == 1|| tempInt==0) {
+			if (tempInt == 1 || tempInt == 0) {
 				tempResult = tempResult + tempInt;
 			} else {
 				for (int k = 0; k < tempInt; k++) {
