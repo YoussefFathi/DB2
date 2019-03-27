@@ -49,10 +49,10 @@ public class BitmapObject implements Serializable, Comparable {
 			return 1;
 		}
 	}
-	public String andBitmap(BitmapObject bo){
+	public String andBitmap(String bm2){
 		String result="";
 		String bm1=this.getBitmap();
-		String bm2=bo.getBitmap();
+//		String bm2=bo.getBitmap();
 		for(int i=0;i<bm1.length();i++){
 			if(bm1.charAt(i)=='0' || bm2.charAt(i)=='0'){
 				result=result+"0";
@@ -62,10 +62,10 @@ public class BitmapObject implements Serializable, Comparable {
 		return result;
 	}
 
-public String orBitmap(BitmapObject bo){
+public String orBitmap(String bm2){
 	String result="";
 	String bm1=this.getBitmap();
-	String bm2=bo.getBitmap();
+//	String bm2=bo.getBitmap();
 	for(int i=0;i<bm1.length();i++){
 		if(bm1.charAt(i)=='1' || bm2.charAt(i)=='1'){
 			result=result+"1";

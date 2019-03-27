@@ -166,54 +166,6 @@ public class Table implements Serializable {
 
 	}
 
-	public void insertTuple(Hashtable<String, Object> htblColNameValue) {
-		int pageNo = 0;
-		Page currentPage = null;
-		if (noRows == maxRows) {
-			pageNo = pages.size();
-			currentPage = new Page();
-			pages.add(pageNo);
-			noRows = 0;
-		} else {
-			pageNo = pages.size() - 1;
-			currentPage = readPage(pageNo);
-		}
-		ArrayList attrs = new ArrayList(attrNo);
-		Set<String> names = htblColNameValue.keySet();
-		int key = 0;
-		for (String name : names) {
-			Object value = htblColNameValue.get(name);
-			// System.out.println(name +value);
-			if (checkType(name, value)) {
-				attrs.add(value);
-				if (name.equals(tableKey)) {
-					key = attrs.size();
-				}
-			} else {
-				System.out.println("Invalid Input for" + name + " " + value);
-				return;
-			}
-
-		}
-
-		currentPage.addTuple(new Tuple(attrs, key, null));
-
-		writePage(currentPage, pageNo);
-		readPage(pageNo);
-		noRows++;
-
-	}
-	// public Class<?> getType(String name) {
-	// switch (name) {
-	// case "java.lang.Integer":return int.class;
-	// case "java.lang.String":return String.class;
-	// case "java.lang.Double":return double.class;
-	// case "java.lang.Boolean":return boolean.class;
-	// case "java.util.Date":return Date.class;
-	// default:return null;
-	// }
-	// }
-
 	public boolean checkType(String name, Object value) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(new File("./data/metaData.csv")));
@@ -411,11 +363,16 @@ public class Table implements Serializable {
 						shiftPagesUp(i);
 					} else if (!(tempVector.size() == 0) && i != pages.size() - 1) {
 						writePage(currentPage, i);
+						pages.set(i, currentPage.readTuples().size());
 					} else if (tempVector.size() == 0 && i == pages.size() - 1) {
 						removePage(i);
+					} else {
+						writePage(currentPage, i);
+						pages.set(i, currentPage.readTuples().size());
 					}
 				}
 			}
+
 		}
 	}
 
@@ -431,7 +388,7 @@ public class Table implements Serializable {
 	public void shiftPagesUp(int startPage) {
 		pages.remove(startPage);
 		for (int i = startPage; i < pages.size(); i++) {
-			pages.set(i, i);
+			// pages.set(i, pages.get(i));
 			Page currentPage = this.readPage(i + 1);
 			this.writePage(currentPage, i);
 		}
@@ -592,17 +549,21 @@ public class Table implements Serializable {
 						Page previousPage = readPage(i - 1);
 						previousPage.addTuple(tupleToInsert);
 						previousPage.sort();
+
 						if (tempVector.size() > maxRows) {
 							Tuple overFlowTuple = tempVector.remove(maxRows);
 							writePage(previousPage, i - 1);
 							shiftingPages(overFlowTuple, i - 1);
+
 							bitmapHandleInsert(tupleToInsert, countRows);
 						} else {
 							writePage(previousPage, i - 1);
 							bitmapHandleInsert(tupleToInsert, countRows);
 						}
+						pages.set(i - 1, previousPage.readTuples().size());
 						return;
 					} else {
+
 						currentPage.addTuple(tupleToInsert);
 						currentPage.sort();
 						if (tempVector.size() > maxRows) {
@@ -622,7 +583,7 @@ public class Table implements Serializable {
 				}
 				countRows++;
 			}
-
+			pages.set(i, tempVector.size());
 		}
 
 		currentPage = readPage(pages.size() - 1);
@@ -645,7 +606,7 @@ public class Table implements Serializable {
 			Tuple overFlow = tempVector.remove(maxRows);
 			writePage(currentPage, pages.size() - 1);
 			currentPage = new Page();
-			pages.add(pages.size());
+			pages.add(1);
 			currentPage.addTuple(overFlow);
 			writePage(currentPage, pages.size() - 1);
 			bitmapHandleInsert(tupleToInsert, countRows);
@@ -655,6 +616,7 @@ public class Table implements Serializable {
 
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
+				pages.set(pages.size() - 1, tempVector.size());
 				writePage(currentPage, pages.size() - 1);
 				bitmapHandleInsert(tupleToInsert, countRows);
 
@@ -662,15 +624,13 @@ public class Table implements Serializable {
 
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
+				pages.set(pages.size() - 1, tempVector.size());
 				int num = 0;
 				writePage(currentPage, pages.size() - 1);
 				bitmapHandleInsert(tupleToInsert, countRows);
 
 			}
 		}
-	}
-
-	public void bitmapHandleUpdate() {
 
 	}
 
@@ -821,7 +781,7 @@ public class Table implements Serializable {
 		if (index >= pages.size()) {
 			int pageNo = pages.size();
 			Page currentPage = new Page();
-			pages.add(pageNo);
+			pages.add(1);
 			currentPage.addTuple(overFlowTuple);
 			writePage(currentPage, index);
 		} else {
@@ -829,11 +789,13 @@ public class Table implements Serializable {
 			if (currentPage.readTuples().size() < maxRows) {
 				currentPage.addTuple(overFlowTuple);
 				currentPage.sort();
+				pages.set(index, currentPage.readTuples().size());
 				writePage(currentPage, index);
 			} else {
 				currentPage.addTuple(overFlowTuple);
 				currentPage.sort();
 				Tuple newOverFlow = (Tuple) currentPage.readTuples().remove(maxRows);
+				pages.set(index, currentPage.readTuples().size());
 				writePage(currentPage, index);
 				shiftingPages(newOverFlow, ++index);
 			}
@@ -867,6 +829,211 @@ public class Table implements Serializable {
 
 		}
 
+	}
+
+	public String queryIndexed(SQLTerm sqlTerm) throws DBAppException {
+		String colName = sqlTerm._strColumnName;
+		String op = sqlTerm._strOperator;
+		Object value = sqlTerm._objValue;
+		boolean found = false;
+		String tempResult = "";
+		int rowCount = 0;
+		for (int i = 0; i < pages.size(); i++) {
+			rowCount = rowCount + pages.get(i);
+		}
+		for (int i = 0; i < rowCount; i++) {
+			tempResult += "0";
+		}
+		boolean start = false;
+		int first = 0;
+		BitmapObject queriedValue = new BitmapObject(value, "");
+		for (int i = 0; i < BitmapPages.size(); i++) {
+			if (BitmapPages.get(i).equals(colName) && !found) {
+				first = i;
+				found = true;
+			} else if (found && !((BitmapPages.get(i)).equals(colName))) {
+				break;
+			}
+			BitMapPage currentPage = readBitmapPage(i - first, colName);
+			Vector<BitmapObject> vec = currentPage.readTuples();
+			for (int j = 0; j < vec.size(); j++) {
+				BitmapObject currentValue = vec.get(j);
+				switch (op) {
+				case ">":
+					if (currentValue.compareTo(queriedValue) == 1 && !start) {
+						start = true;
+						tempResult = currentValue.getBitmap();
+					} else if (currentValue.compareTo(queriedValue) == 1) {
+						tempResult = currentValue.orBitmap(tempResult);
+					}
+					break;
+				case ">=":
+					if (currentValue.compareTo(queriedValue) > 0 && !start) {
+						start = true;
+						tempResult = currentValue.getBitmap();
+					} else if (currentValue.compareTo(queriedValue) > 0) {
+						tempResult = currentValue.orBitmap(tempResult);
+					}
+					break;
+				case "<":
+					if (currentValue.compareTo(queriedValue) < 0 && !start) {
+						start = true;
+						tempResult = currentValue.getBitmap();
+					} else if (currentValue.compareTo(queriedValue) < 0) {
+						tempResult = currentValue.orBitmap(tempResult);
+					}
+					break;
+				case "<=":
+					if ((currentValue.compareTo(queriedValue) < 0 || currentValue.compareTo(queriedValue) == 2)
+							&& !start) {
+						start = true;
+						tempResult = currentValue.getBitmap();
+					} else if ((currentValue.compareTo(queriedValue) < 0
+							|| currentValue.compareTo(queriedValue) == 2)) {
+						tempResult = currentValue.orBitmap(tempResult);
+					}
+					break;
+				case "=":
+					if (currentValue.compareTo(queriedValue) == 2) {
+						tempResult = currentValue.getBitmap();
+					}
+					break;
+				case "!=":
+					if (currentValue.compareTo(queriedValue) != 2 && !start) {
+						start = true;
+						tempResult = currentValue.getBitmap();
+					} else if (currentValue.compareTo(queriedValue) != 2) {
+						tempResult = currentValue.orBitmap(tempResult);
+					}
+					break;
+				default:
+					throw new DBAppException("Invalid op");
+				}
+
+			}
+		}
+		if (!columnNames.contains(colName)) {
+			throw new DBAppException("Column Name not found");
+		}
+		return tempResult;
+
+	}
+
+	public static int compareObjects(Object tuple2, Object tuple1) {
+		boolean flag = true;
+
+		try {
+			Double thisAttr = Double.parseDouble("" + tuple2);
+			Double otherAttr = Double.parseDouble("" + tuple1);
+			if (thisAttr > otherAttr) {
+				return 1;
+			} else if (thisAttr < otherAttr) {
+				return -1;
+			} else {
+				return 2;
+			}
+		} catch (NumberFormatException e) {
+			String thisAttr = ("" + tuple2);
+			String otherAttr = ("" + tuple1);
+			if (thisAttr.compareTo(otherAttr) > 0) {
+				return 1;
+			} else if ((thisAttr).compareTo(otherAttr) < 0) {
+				return -1;
+			} else
+				return 2;
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return 1;
+		}
+	}
+
+	public String queryNormal(SQLTerm sqlTerm) throws DBAppException {
+		String colName = sqlTerm._strColumnName;
+		String op = sqlTerm._strOperator;
+		Object queriedValue = sqlTerm._objValue;
+		String result = "";
+		if (!columnNames.contains(colName)) {
+			throw new DBAppException("Column Name not found");
+		}
+		for (int i = 0; i < pages.size(); i++) { // loop over all pages
+			Vector<Tuple> currentTuples = readPage(i).readTuples();
+			for (int j = 0; j < currentTuples.size(); j++) { // loop over all tuples per page
+				Object currentValue = currentTuples.get(j).getAttributes()
+						.get(currentTuples.get(j).getColName().indexOf(colName));
+				switch (op) {
+				case ">":
+					if (compareObjects(currentValue, queriedValue) == 1) {
+						result += "1";
+					} else {
+						result += "0";
+					}
+					break;
+				case ">=":
+					if (compareObjects(currentValue, queriedValue) > 0) {
+						result += "1";
+					} else {
+						result += "0";
+					}
+					break;
+				case "<":
+					if (compareObjects(currentValue, queriedValue) < 0) {
+						result += "1";
+					} else {
+						result += "0";
+					}
+					break;
+				case "<=":
+					if (compareObjects(currentValue, queriedValue) < 0
+							|| compareObjects(currentValue, queriedValue) == 2) {
+						result += "1";
+					} else {
+						result += "0";
+					}
+					break;
+				case "=":
+					if (compareObjects(currentValue, queriedValue) == 2) {
+						result += "1";
+					} else {
+						result += "0";
+					}
+					break;
+				case "!=":
+					if (compareObjects(currentValue, queriedValue) != 2) {
+						result += "1";
+					} else {
+						result += "0";
+					}
+					break;
+				default:
+					throw new DBAppException("Invalid op");
+				}
+			}
+		}
+		return result;
+	}
+
+	public Vector<Tuple> getVectorResult(String temp) {
+		int index = 0;
+		Vector<Tuple> result = new Vector<Tuple>();
+		for (int i = 0; i < pages.size(); i++) { // loop over all pages
+			Vector<Tuple> currentTuples = readPage(i).readTuples();
+			for (int j = 0; j < currentTuples.size(); j++) { // loop over all tuples per page
+				if(temp.charAt(index)=='1') {
+					result.add(currentTuples.get(j));
+				}
+				index++;
+			}
+			
+		}
+		return result;
+	}
+
+	public boolean isIndexed(String colName) {
+		// TODO Auto-generated method stub
+		if (BitmapPages.contains(colName)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public static void main(String[] args) {
