@@ -24,11 +24,11 @@ public class BitmapObject implements Serializable, Comparable {
 		this.bitmap = bitmap;
 	}
 	public static void main(String[] args) {
-		 String b = new String("Tutorial");
-		 StringBuilder str = new StringBuilder(b);
-		 str.insert(7, 's');
-		   System.out.print("After insertion = ");
-		   System.out.println(str.toString());// this will print Tutorials
+//		 String b = new String("Tutorial");
+//		 StringBuilder str = new StringBuilder(b);
+//		 str.insert(7, 's');
+//		   System.out.print("After insertion = ");
+//		   System.out.println(str.toString());// this will print Tutorials
 	}
 	@Override
 	public int compareTo(Object BitObject) {

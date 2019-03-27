@@ -22,7 +22,7 @@ public class BitMapPage implements Serializable  {
 		Collections.sort(bitmapObjects);
 	}
 	public static void main(String[] args) {
-		System.out.println("00000000".contains("1"));
+//		System.out.println("00000000".contains("1"));
 	}
 
 }
