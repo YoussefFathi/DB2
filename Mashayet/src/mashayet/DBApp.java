@@ -202,7 +202,7 @@ public class DBApp {
 			app.insertIntoTable(strTableName2, htblColNameValue2);
 			app.createTable(strTableName, "id", htblColNameType);
 			Hashtable htblColNameValue = new Hashtable();
-			// app.createBitmapIndex(strTableName, "name");
+			 app.createBitmapIndex(strTableName, "name");
 			 app.createBitmapIndex(strTableName, "gpa");
 			app.createBitmapIndex(strTableName, "id");
 			htblColNameValue.put("id", new Integer(2343432));
@@ -253,7 +253,7 @@ public class DBApp {
 			htblColNameValue.put("gpa", new Double(0.95));
 
 			app.printing(app);
-			app.deleteFromTable(strTableName, htblColNameValue);
+//			app.deleteFromTable(strTableName, htblColNameValue);
 			System.out.println("*************************************************************************");
 			app.printing(app);
 
@@ -262,7 +262,7 @@ public class DBApp {
 			htblColNameValue.put("name", new String("Ahmed Noor"));
 			htblColNameValue.put("gpa", new Double(0.95));
 
-			app.deleteFromTable(strTableName, htblColNameValue);
+//			app.deleteFromTable(strTableName, htblColNameValue);
 			app.printing(app);
 
 			// htblColNameValue.clear();

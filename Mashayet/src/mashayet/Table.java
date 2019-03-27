@@ -136,7 +136,7 @@ public class Table implements Serializable {
 				if (((Tuple) tuples.get(j)).getAttributes().contains(key)) {
 					ArrayList attrs = getArrayFromHash(htblColNameValue);
 					Tuple removed = (Tuple) tuples.remove(j);
-					handleDelete(removed,countRows);
+					handleDelete(removed, countRows);
 					countRows--;
 					// Tuple temp = new
 					// Tuple(removed.getAttributes(),removed.getKeyIndex(),removed.getColName());
@@ -145,7 +145,7 @@ public class Table implements Serializable {
 					try {
 						insertSortedTuple(htblColNameValue);
 						ArrayList attrsTemp = new ArrayList(attrNo);
-						
+
 						ArrayList colNames = new ArrayList();
 						Set<String> names = htblColNameValue.keySet();
 						int keyTemp = -1;
@@ -167,11 +167,11 @@ public class Table implements Serializable {
 						}
 
 						Tuple tupleToInsert = new Tuple(attrs, keyTemp, colNames);
-						bitmapHandleInsert(tupleToInsert,countRows);
+						bitmapHandleInsert(tupleToInsert, countRows);
 					} catch (DBAppException e) {
 						System.out.println(e.getMessage());
 						tuples.add(j, removed);
-						bitmapHandleInsert(removed,countRows);
+						bitmapHandleInsert(removed, countRows);
 						this.writePage(tempPage, i);
 
 					}
@@ -437,7 +437,7 @@ public class Table implements Serializable {
 					} else if (tempVector.size() == 0 && i == BitmapPages.size() - 1) {
 						bitMapremovePage(pages, col);
 
-					}else {
+					} else {
 						writeBitmapPage(currentPage, pages, col);
 					}
 				}
@@ -1149,19 +1149,54 @@ public class Table implements Serializable {
 		}
 		return result;
 	}
-
+//	public static int binarySearch(BitmapObject x) 
+//	    { 
+//		for(int i=0;i<BitmappedPages.) {
+//	        int l = 0, r = arr.length - 1; 
+//	        while (l <= r) { 
+//	            int m = l + (r - l) / 2; 
+//	  
+//	            // Check if x is present at mid 
+//	            if (arr[m] == x) 
+//	                return m; 
+//	  
+//	            // If x greater, ignore left half 
+//	            if (arr[m] < x) 
+//	                l = m + 1; 
+//	  
+//	            // If x is smaller, ignore right half 
+//	            else
+//	                r = m - 1; 
+//	        } 
+//	  
+//	        // if we reach here, then element was 
+//	        // not present 
+//	        return -1; 
+//	    } 
 	public Vector<Tuple> getVectorResult(String temp) {
 		int index = 0;
 		Vector<Tuple> result = new Vector<Tuple>();
-		for (int i = 0; i < pages.size(); i++) { // loop over all pages
-			Vector<Tuple> currentTuples = readPage(i).readTuples();
-			for (int j = 0; j < currentTuples.size(); j++) { // loop over all tuples per page
-				if (temp.charAt(index) == '1') {
-					result.add(currentTuples.get(j));
-				}
-				index++;
+		String reserve = temp;
+		ArrayList<String> repPages = new ArrayList<String>();
+		for (int i = 0; i < pages.size(); i++) { //Splits the bitmap according to pages and rows in each page
+			String pageString = "";
+			for (int j = 0; j < pages.get(i); j++) {
+				pageString = pageString + reserve.charAt(0);
+				reserve = reserve.substring(1);
 			}
-
+			repPages.add(pageString);
+		}
+		for (int i = 0; i < repPages.size(); i++) { 
+			if (repPages.get(i).contains("1")) { // Read pages only if it contains 1
+				Page page = readPage(i);
+				Vector<Tuple> tuples = page.readTuples();
+				for (int j = 0; j < repPages.get(i).length(); j++) {
+					char bit = repPages.get(i).charAt(j);
+					if (bit == '1') {
+						result.add(tuples.get(j));
+					}
+				}
+			}
 		}
 		return result;
 	}
