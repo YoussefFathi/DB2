@@ -130,13 +130,11 @@ public class Table implements Serializable {
 	public void updateTuple(Object key, Hashtable<String, Object> htblColNameValue) {
 		int countRows = 0;
 		ArrayList attrs = new ArrayList();
-		htblColNameValue.put(tableKey, key);
-		deleteTuple(htblColNameValue);
-	
+		Hashtable<String, Object> temp = new Hashtable<String,Object>();
+		temp.put(tableKey, key);
+		Tuple removed = deleteTuple(temp);
 		try {
-
 			ArrayList attrsTemp = new ArrayList(attrNo);
-
 			ArrayList colNames = new ArrayList();
 			Set<String> names = htblColNameValue.keySet();
 			int keyTemp = -1;
@@ -173,14 +171,10 @@ public class Table implements Serializable {
 			// bitmapHandleInsert(tupleToInsert, countRows);
 		} catch (DBAppException e) {
 			System.out.println(e.getMessage());
-			tuples.add(j, removed);
-			bitmapHandleInsert(removed, countRows);
-			this.writePage(tempPage, i);
+			
 
 		}
-		readPage(i);
-		return;
-	}countRows++;
+	
 
 	}
 
@@ -356,10 +350,10 @@ public class Table implements Serializable {
 		}
 	}
 
-	public void deleteTuple(Hashtable<String, Object> htblColNameValue) {
+	public Tuple deleteTuple(Hashtable<String, Object> htblColNameValue) {
 		Page currentPage = null;
 		ArrayList attrs = new ArrayList(attrNo);
-
+		Tuple tupleToDelete = null;
 		ArrayList colNames = new ArrayList();
 		Set<String> names = htblColNameValue.keySet();
 		int key = -1;
@@ -377,12 +371,12 @@ public class Table implements Serializable {
 			} else {
 				System.out.println("Invalid Input for" + name + " " + value);
 
-				return;
+				return null;
 			}
 
 		}
 		int countRows = 0;
-		Tuple tupleToDelete = new Tuple(attrs, key, colNames);
+		tupleToDelete = new Tuple(attrs, key, colNames);
 		for (int i = 0; i < pages.size(); i++) {
 			currentPage = readPage(i);
 			Vector<Tuple> tempVector = currentPage.readTuples();
@@ -416,6 +410,7 @@ public class Table implements Serializable {
 			}
 
 		}
+		return tupleToDelete;
 
 	}
 
