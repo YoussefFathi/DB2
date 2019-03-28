@@ -129,69 +129,59 @@ public class Table implements Serializable {
 
 	public void updateTuple(Object key, Hashtable<String, Object> htblColNameValue) {
 		int countRows = 0;
-		for (int i = 0; i < pages.size(); i++) {
-			Page tempPage = readPage(i);
-			Vector tuples = tempPage.readTuples();
-			for (int j = 0; j < tuples.size(); j++) {
-				if (((Tuple) tuples.get(j)).getAttributes().contains(key)) {
-					ArrayList attrs = new ArrayList();
-					Tuple removed = (Tuple) tuples.remove(j);
-					handleDelete(removed, countRows);
-					countRows--;
-					// Tuple temp = new
-					// Tuple(removed.getAttributes(),removed.getKeyIndex(),removed.getColName());
-					// removed.setAttributes(attrs);
-					this.writePage(tempPage, i);
-					try {
+		ArrayList attrs = new ArrayList();
+		htblColNameValue.put(tableKey, key);
+		deleteTuple(htblColNameValue);
+	
+		try {
 
-						ArrayList attrsTemp = new ArrayList(attrNo);
+			ArrayList attrsTemp = new ArrayList(attrNo);
 
-						ArrayList colNames = new ArrayList();
-						Set<String> names = htblColNameValue.keySet();
-						int keyTemp = -1;
-						for (String name : names) {
+			ArrayList colNames = new ArrayList();
+			Set<String> names = htblColNameValue.keySet();
+			int keyTemp = -1;
+			for (String name : names) {
 
-							Object value = htblColNameValue.get(name);
-							// System.out.println(name +value);
-							if (checkType(name, value)) {
+				Object value = htblColNameValue.get(name);
+				// System.out.println(name +value);
+				if (checkType(name, value)) {
 
-								attrs.add(value);
-								colNames.add(name);
-								if (name.equals(tableKey)) {
-									key = attrs.size() - 1;
-								}
-							} else {
-								throw new DBAppException("Invalid Input " + name + " , " + value);
-							}
-
-						}
-						if (colNames.size() < removed.getColName().size()) { // To leave the unupdated column values as
-																				// is
-							for (int k = 0; k < removed.getColName().size()-1; k++) {
-								if (!(colNames.contains(removed.getColName().get(k))&&!(removed.getColName().get(k).equals("TouchDate")))) {
-									colNames.add(removed.getColName().get(k));
-									attrs.add(removed.getAttributes().get(k));
-									htblColNameValue.put((String) removed.getColName().get(k), removed.getAttributes().get(k));
-								}
-							}
-						}
-						insertSortedTuple(htblColNameValue);
-						countRows++;
-						Tuple tupleToInsert = new Tuple(attrs, keyTemp, colNames);
-						bitmapHandleInsert(tupleToInsert, countRows);
-					} catch (DBAppException e) {
-						System.out.println(e.getMessage());
-						tuples.add(j, removed);
-						bitmapHandleInsert(removed, countRows);
-						this.writePage(tempPage, i);
-
+					attrs.add(value);
+					colNames.add(name);
+					if (name.equals(tableKey)) {
+						key = attrs.size() - 1;
 					}
-					readPage(i);
-					return;
+				} else {
+					throw new DBAppException("Invalid Input " + name + " , " + value);
 				}
-				countRows++;
+
 			}
+			if (colNames.size() < removed.getColName().size()) { // To leave the unupdated column values as
+																	// is
+				for (int k = 0; k < removed.getColName().size() - 1; k++) {
+					if (!(colNames.contains(removed.getColName().get(k))
+							&& !(removed.getColName().get(k).equals("TouchDate")))) {
+						colNames.add(removed.getColName().get(k));
+						attrs.add(removed.getAttributes().get(k));
+						htblColNameValue.put((String) removed.getColName().get(k), removed.getAttributes().get(k));
+					}
+				}
+			}
+			insertSortedTuple(htblColNameValue);
+			// countRows++;
+			// Tuple tupleToInsert = new Tuple(attrs, keyTemp, colNames);
+			// bitmapHandleInsert(tupleToInsert, countRows);
+		} catch (DBAppException e) {
+			System.out.println(e.getMessage());
+			tuples.add(j, removed);
+			bitmapHandleInsert(removed, countRows);
+			this.writePage(tempPage, i);
+
 		}
+		readPage(i);
+		return;
+	}countRows++;
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1047,64 +1037,64 @@ public class Table implements Serializable {
 			if (BitmapPages.get(i).equals(colName) && !found) {
 				first = i;
 				found = true;
-			
-			BitMapPage currentPage = readBitmapPage(i - first, colName);
-			Vector<BitmapObject> vec = currentPage.readTuples();
-			for (int j = 0; j < vec.size(); j++) {
-				BitmapObject currentValue = vec.get(j);
-				switch (op) {
-				case ">":
-					if (currentValue.compareTo(queriedValue) == 1 && !start) {
-						start = true;
-						tempResult = currentValue.getBitmap();
-					} else if (currentValue.compareTo(queriedValue) == 1) {
-						tempResult = currentValue.orBitmap(tempResult);
-					}
-					break;
-				case ">=":
-					if (currentValue.compareTo(queriedValue) > 0 && !start) {
-						start = true;
-						tempResult = currentValue.getBitmap();
-					} else if (currentValue.compareTo(queriedValue) > 0) {
-						tempResult = currentValue.orBitmap(tempResult);
-					}
-					break;
-				case "<":
-					if (currentValue.compareTo(queriedValue) < 0 && !start) {
-						start = true;
-						tempResult = currentValue.getBitmap();
-					} else if (currentValue.compareTo(queriedValue) < 0) {
-						tempResult = currentValue.orBitmap(tempResult);
-					}
-					break;
-				case "<=":
-					if ((currentValue.compareTo(queriedValue) < 0 || currentValue.compareTo(queriedValue) == 2)
-							&& !start) {
-						start = true;
-						tempResult = currentValue.getBitmap();
-					} else if ((currentValue.compareTo(queriedValue) < 0
-							|| currentValue.compareTo(queriedValue) == 2)) {
-						tempResult = currentValue.orBitmap(tempResult);
-					}
-					break;
-				case "=":
-					if (currentValue.compareTo(queriedValue) == 2) {
-						tempResult = currentValue.getBitmap();
-					}
-					break;
-				case "!=":
-					if (currentValue.compareTo(queriedValue) != 2 && !start) {
-						start = true;
-						tempResult = currentValue.getBitmap();
-					} else if (currentValue.compareTo(queriedValue) != 2) {
-						tempResult = currentValue.orBitmap(tempResult);
-					}
-					break;
-				default:
-					throw new DBAppException("Invalid op");
-				}
 
-			}
+				BitMapPage currentPage = readBitmapPage(i - first, colName);
+				Vector<BitmapObject> vec = currentPage.readTuples();
+				for (int j = 0; j < vec.size(); j++) {
+					BitmapObject currentValue = vec.get(j);
+					switch (op) {
+					case ">":
+						if (currentValue.compareTo(queriedValue) == 1 && !start) {
+							start = true;
+							tempResult = currentValue.getBitmap();
+						} else if (currentValue.compareTo(queriedValue) == 1) {
+							tempResult = currentValue.orBitmap(tempResult);
+						}
+						break;
+					case ">=":
+						if (currentValue.compareTo(queriedValue) > 0 && !start) {
+							start = true;
+							tempResult = currentValue.getBitmap();
+						} else if (currentValue.compareTo(queriedValue) > 0) {
+							tempResult = currentValue.orBitmap(tempResult);
+						}
+						break;
+					case "<":
+						if (currentValue.compareTo(queriedValue) < 0 && !start) {
+							start = true;
+							tempResult = currentValue.getBitmap();
+						} else if (currentValue.compareTo(queriedValue) < 0) {
+							tempResult = currentValue.orBitmap(tempResult);
+						}
+						break;
+					case "<=":
+						if ((currentValue.compareTo(queriedValue) < 0 || currentValue.compareTo(queriedValue) == 2)
+								&& !start) {
+							start = true;
+							tempResult = currentValue.getBitmap();
+						} else if ((currentValue.compareTo(queriedValue) < 0
+								|| currentValue.compareTo(queriedValue) == 2)) {
+							tempResult = currentValue.orBitmap(tempResult);
+						}
+						break;
+					case "=":
+						if (currentValue.compareTo(queriedValue) == 2) {
+							tempResult = currentValue.getBitmap();
+						}
+						break;
+					case "!=":
+						if (currentValue.compareTo(queriedValue) != 2 && !start) {
+							start = true;
+							tempResult = currentValue.getBitmap();
+						} else if (currentValue.compareTo(queriedValue) != 2) {
+							tempResult = currentValue.orBitmap(tempResult);
+						}
+						break;
+					default:
+						throw new DBAppException("Invalid op");
+					}
+
+				}
 			} else if (found && !((BitmapPages.get(i)).equals(colName))) {
 				break;
 			}
