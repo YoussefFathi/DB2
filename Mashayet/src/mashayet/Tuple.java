@@ -28,7 +28,7 @@ public class Tuple implements Serializable, Comparable {
 	}
 
 	@Override
-	public int compareTo(Object tuple1) {
+	public int compareTo(Object tuple1) { 	
 		boolean flag = true;
 		Tuple min = (((Tuple) tuple1).attrs.size() >= this.attrs.size()) ? this : (Tuple) tuple1;
 		Tuple max = (((Tuple) tuple1).attrs.size() < this.attrs.size()) ? this : (Tuple) tuple1;
