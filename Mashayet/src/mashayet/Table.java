@@ -366,6 +366,7 @@ public class Table implements Serializable {
 
 	public Tuple deleteTuple(Hashtable<String, Object> htblColNameValue) {
 		Page currentPage = null;
+		boolean flag=false;
 		ArrayList attrs = new ArrayList(attrNo);
 		Tuple tupleToDelete=null;
 		ArrayList colNames = new ArrayList();
@@ -397,7 +398,8 @@ public class Table implements Serializable {
 			for (int j = 0; j < tempVector.size(); j++) {
 				System.out.println(tempVector.get(j) + "  COMPARED WITH: " + tupleToDelete);
 				if (tempVector.get(j).compareTo(tupleToDelete) == 0) {
-					tempVector.remove(j--);
+					tupleToDelete=tempVector.remove(j--);
+					flag=true;
 					if (tempVector.size() == 0 && i != pages.size() - 1) {
 						shiftPagesUp(i);
 						handleDelete(tupleToDelete, countRows);
@@ -424,7 +426,9 @@ public class Table implements Serializable {
 			}
 
 		}
+		if(flag)
 		return tupleToDelete;
+		return null;
 
 	}
 
