@@ -127,54 +127,56 @@ public class Table implements Serializable {
 		return attrs;
 	}
 
-	public void updateTuple(Object key, Hashtable<String, Object> htblColNameValue) {
+	public void updateTuple(Object key, Hashtable<String, Object> htblColNameValue) throws DBAppException {
 		int countRows = 0;
 		ArrayList attrs = new ArrayList();
-		Hashtable<String, Object> temp = new Hashtable<String,Object>();
+		Hashtable<String, Object> temp = new Hashtable<String, Object>();
 		temp.put(tableKey, key);
 		Tuple removed = deleteTuple(temp);
-		try {
-			ArrayList attrsTemp = new ArrayList(attrNo);
-			ArrayList colNames = new ArrayList();
-			Set<String> names = htblColNameValue.keySet();
-			int keyTemp = -1;
-			for (String name : names) {
+		if (removed == null) {
+			throw new DBAppException("TUPLE NOT FOUND FOR UPDATE");
+		} else {
+			try {
+				ArrayList attrsTemp = new ArrayList(attrNo);
+				ArrayList colNames = new ArrayList();
+				Set<String> names = htblColNameValue.keySet();
+				int keyTemp = -1;
+				for (String name : names) {
 
-				Object value = htblColNameValue.get(name);
-				// System.out.println(name +value);
-				if (checkType(name, value)) {
+					Object value = htblColNameValue.get(name);
+					// System.out.println(name +value);
+					if (checkType(name, value)) {
 
-					attrs.add(value);
-					colNames.add(name);
-					if (name.equals(tableKey)) {
-						key = attrs.size() - 1;
+						attrs.add(value);
+						colNames.add(name);
+						if (name.equals(tableKey)) {
+							key = attrs.size() - 1;
+						}
+					} else {
+						throw new DBAppException("Invalid Input " + name + " , " + value);
 					}
-				} else {
-					throw new DBAppException("Invalid Input " + name + " , " + value);
+
 				}
+				if (colNames.size() < removed.getColName().size()) { // To leave the unupdated column values as
+																		// is
+					for (int k = 0; k < removed.getColName().size() - 1; k++) {
+						if (!(colNames.contains(removed.getColName().get(k))
+								&& !(removed.getColName().get(k).equals("TouchDate")))) {
+							colNames.add(removed.getColName().get(k));
+							attrs.add(removed.getAttributes().get(k));
+							htblColNameValue.put((String) removed.getColName().get(k), removed.getAttributes().get(k));
+						}
+					}
+				}
+				insertSortedTuple(htblColNameValue);
+				// countRows++;
+				// Tuple tupleToInsert = new Tuple(attrs, keyTemp, colNames);
+				// bitmapHandleInsert(tupleToInsert, countRows);
+			} catch (DBAppException e) {
+				System.out.println(e.getMessage());
 
 			}
-			if (colNames.size() < removed.getColName().size()) { // To leave the unupdated column values as
-																	// is
-				for (int k = 0; k < removed.getColName().size() - 1; k++) {
-					if (!(colNames.contains(removed.getColName().get(k))
-							&& !(removed.getColName().get(k).equals("TouchDate")))) {
-						colNames.add(removed.getColName().get(k));
-						attrs.add(removed.getAttributes().get(k));
-						htblColNameValue.put((String) removed.getColName().get(k), removed.getAttributes().get(k));
-					}
-				}
-			}
-			insertSortedTuple(htblColNameValue);
-			// countRows++;
-			// Tuple tupleToInsert = new Tuple(attrs, keyTemp, colNames);
-			// bitmapHandleInsert(tupleToInsert, countRows);
-		} catch (DBAppException e) {
-			System.out.println(e.getMessage());
-			
-
 		}
-	
 
 	}
 
@@ -352,7 +354,7 @@ public class Table implements Serializable {
 
 	public Tuple deleteTuple(Hashtable<String, Object> htblColNameValue) {
 		Page currentPage = null;
-		boolean flag=false;
+		boolean flag = false;
 		ArrayList attrs = new ArrayList(attrNo);
 		Tuple tupleToDelete = null;
 		ArrayList colNames = new ArrayList();
@@ -384,8 +386,8 @@ public class Table implements Serializable {
 			for (int j = 0; j < tempVector.size(); j++) {
 				System.out.println(tempVector.get(j) + "  COMPARED WITH: " + tupleToDelete);
 				if (tempVector.get(j).compareTo(tupleToDelete) == 0) {
-					tupleToDelete=tempVector.remove(j--);
-					flag=true;
+					tupleToDelete = tempVector.remove(j--);
+					flag = true;
 					if (tempVector.size() == 0 && i != pages.size() - 1) {
 						shiftPagesUp(i);
 						handleDelete(tupleToDelete, countRows);
@@ -412,8 +414,8 @@ public class Table implements Serializable {
 			}
 
 		}
-		if(flag)
-		return tupleToDelete;
+		if (flag)
+			return tupleToDelete;
 		return null;
 
 	}
