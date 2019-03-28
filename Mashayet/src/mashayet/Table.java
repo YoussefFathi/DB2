@@ -638,14 +638,30 @@ public class Table implements Serializable {
 			}
 
 		}
-
+		
 		currentPage = readBitmapPage(temp.size() - 1, colName);
 		Vector<BitmapObject> tempVector = currentPage.readTuples();
 		for (int j = 0; j < tempVector.size(); j++) {
 			if (tempVector.get(j).compareTo(tupleToInsert) == 2 || tempVector.get(j).compareTo(tupleToInsert) == 0) {
 				throw new DBAppException("Duplicate Insertion");
 			}
+			if (j == 0 && i > 0) {
+				BitMapPage previousPage = readBitmapPage(i - 1, colName);
+				previousPage.addTuple(tupleToInsert);
+				previousPage.sort();
+				if (tempVector.size() > maxRows) {
+					BitmapObject overFlowTuple = tempVector.remove(maxRows);
+					writeBitmapPage(previousPage, i - 1, colName);
+					shiftingPages(overFlowTuple, i - 1, colName, temp, startInPages);
+
+				} else {
+					writeBitmapPage(previousPage, i - 1, colName);
+
+				}
+				return;
+			}
 		}
+		
 		if (tempVector.size() == maxRows) {
 			currentPage.addTuple(tupleToInsert);
 			currentPage.sort();
@@ -724,10 +740,10 @@ public class Table implements Serializable {
 							writePage(previousPage, i - 1);
 							shiftingPages(overFlowTuple, i - 1);
 
-							bitmapHandleInsert(tupleToInsert, countRows);
+							bitmapHandleInsert(tupleToInsert, countRows-1);
 						} else {
 							writePage(previousPage, i - 1);
-							bitmapHandleInsert(tupleToInsert, countRows);
+							bitmapHandleInsert(tupleToInsert, countRows-1);
 						}
 						pages.set(i - 1, previousPage.readTuples().size());
 						return;
