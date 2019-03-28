@@ -608,6 +608,7 @@ public class Table implements Serializable {
 						BitMapPage previousPage = readBitmapPage(i - 1, colName);
 						previousPage.addTuple(tupleToInsert);
 						previousPage.sort();
+						tempVector=previousPage.readTuples();
 						if (tempVector.size() > maxRows) {
 							BitmapObject overFlowTuple = tempVector.remove(maxRows);
 							writeBitmapPage(previousPage, i - 1, colName);
@@ -649,6 +650,7 @@ public class Table implements Serializable {
 				BitMapPage previousPage = readBitmapPage(i - 1, colName);
 				previousPage.addTuple(tupleToInsert);
 				previousPage.sort();
+				tempVector=previousPage.readTuples();
 				if (tempVector.size() > maxRows) {
 					BitmapObject overFlowTuple = tempVector.remove(maxRows);
 					writeBitmapPage(previousPage, i - 1, colName);
@@ -731,10 +733,11 @@ public class Table implements Serializable {
 				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
 
 					if (j == 0 && i > 0) {
+						
 						Page previousPage = readPage(i - 1);
 						previousPage.addTuple(tupleToInsert);
 						previousPage.sort();
-
+						tempVector=previousPage.readTuples();
 						if (tempVector.size() > maxRows) {
 							Tuple overFlowTuple = tempVector.remove(maxRows);
 							writePage(previousPage, i - 1);
