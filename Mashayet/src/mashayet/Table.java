@@ -723,16 +723,17 @@ public class Table implements Serializable {
 			int page = binarySearchPages(keyValue, colNames.get(key));
 			BitmapObject smallerValue = binarySearchTuples(page, keyValue, colNames.get(key));
 			ArrayList<String> repPages = new ArrayList<String>();
-			if(smallerValue!=null) {
-			String reserve = smallerValue.getBitmap();
-			for (int i = 0; i < pages.size(); i++) { // Splits the bitmap according to pages and rows in each page
-				String pageString = "";
-				for (int j = 0; j < pages.get(i); j++) {
-					pageString = pageString + reserve.charAt(0);
-					reserve = reserve.substring(1);
+			if (smallerValue != null) {
+				String reserve = smallerValue.getBitmap();
+				for (int i = 0; i < pages.size(); i++) { // Splits the bitmap according to
+					// pages and rows in each page
+					String pageString = "";
+					for (int j = 0; j < pages.get(i); j++) {
+						pageString = pageString + reserve.charAt(0);
+						reserve = reserve.substring(1);
+					}
+					repPages.add(pageString);
 				}
-				repPages.add(pageString);
-			}
 			}
 			int i = 0;
 			int j = 0;
@@ -751,7 +752,7 @@ public class Table implements Serializable {
 			Page currentPage = readPage(i);
 			Vector<Tuple> tempVector = currentPage.readTuples();
 			countRows = count;
-			if (i != pages.size() - 1&& smallerValue!=null) {
+			if (i != pages.size() - 1 && smallerValue != null) {
 				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
 
 					if (j == 0 && i > 0) {
@@ -773,7 +774,7 @@ public class Table implements Serializable {
 						pages.set(i - 1, previousPage.readTuples().size());
 						return;
 					} else {
-
+						
 						currentPage.addTuple(tupleToInsert);
 						currentPage.sort();
 						if (tempVector.size() > maxRows) {
@@ -794,7 +795,7 @@ public class Table implements Serializable {
 			} else {
 				countRows--;
 				if (tempVector.size() == maxRows) {
-
+					countRows++;
 					currentPage.addTuple(tupleToInsert);
 					currentPage.sort();
 					Tuple overFlow = tempVector.remove(maxRows);
@@ -807,7 +808,7 @@ public class Table implements Serializable {
 
 				} else {
 					if (currentPage.readTuples().size() > 0) {
-
+						
 						currentPage.addTuple(tupleToInsert);
 						currentPage.sort();
 						pages.set(pages.size() - 1, tempVector.size());
@@ -1420,7 +1421,7 @@ public class Table implements Serializable {
 		if (tuples.size() > 0) {
 			if (inserted.compareTo(tuples.get(l)) == 0) {
 				throw new DBAppException("Duplicate Insertion");
-			} else if (inserted.compareTo(tuples.get(l)) == 1&&l!=tuples.size()-1) {
+			} else if (inserted.compareTo(tuples.get(l)) == 1 && l != tuples.size() - 1) {
 				return tuples.get(++l);
 			} else {
 				return tuples.get(l);
