@@ -357,6 +357,7 @@ public class Table implements Serializable {
 		boolean flag = false;
 		ArrayList attrs = new ArrayList(attrNo);
 		Tuple tupleToDelete = null;
+		Tuple deleted = null;
 		ArrayList colNames = new ArrayList();
 		Set<String> names = htblColNameValue.keySet();
 		int key = -1;
@@ -386,26 +387,26 @@ public class Table implements Serializable {
 			for (int j = 0; j < tempVector.size(); j++) {
 				System.out.println(tempVector.get(j) + "  COMPARED WITH: " + tupleToDelete);
 				if (tempVector.get(j).compareTo(tupleToDelete) == 0) {
-					tupleToDelete = tempVector.remove(j--);
+					deleted = tempVector.remove(j--);
 					flag = true;
 					if (tempVector.size() == 0 && i != pages.size() - 1) {
 						shiftPagesUp(i);
-						handleDelete(tupleToDelete, countRows);
+						handleDelete(deleted, countRows);
 						i--;
 						countRows--;
 					} else if (!(tempVector.size() == 0) && i != pages.size() - 1) {
 						writePage(currentPage, i);
-						handleDelete(tupleToDelete, countRows);
+						handleDelete(deleted, countRows);
 						countRows--;
 						pages.set(i, currentPage.readTuples().size());
 					} else if (tempVector.size() == 0 && i == pages.size() - 1) {
 						removePage(i);
-						handleDelete(tupleToDelete, countRows);
+						handleDelete(deleted, countRows);
 						countRows--;
 					} else {
 						writePage(currentPage, i);
 						pages.set(i, currentPage.readTuples().size());
-						handleDelete(tupleToDelete, countRows);
+						handleDelete(deleted, countRows);
 						countRows--;
 					}
 
@@ -415,7 +416,7 @@ public class Table implements Serializable {
 
 		}
 		if (flag)
-			return tupleToDelete;
+			return deleted;
 		return null;
 
 	}
@@ -608,7 +609,7 @@ public class Table implements Serializable {
 						BitMapPage previousPage = readBitmapPage(i - 1, colName);
 						previousPage.addTuple(tupleToInsert);
 						previousPage.sort();
-						tempVector=previousPage.readTuples();
+						tempVector = previousPage.readTuples();
 						if (tempVector.size() > maxRows) {
 							BitmapObject overFlowTuple = tempVector.remove(maxRows);
 							writeBitmapPage(previousPage, i - 1, colName);
@@ -639,7 +640,7 @@ public class Table implements Serializable {
 			}
 
 		}
-		
+
 		currentPage = readBitmapPage(temp.size() - 1, colName);
 		Vector<BitmapObject> tempVector = currentPage.readTuples();
 		for (int j = 0; j < tempVector.size(); j++) {
@@ -650,7 +651,7 @@ public class Table implements Serializable {
 				BitMapPage previousPage = readBitmapPage(i - 1, colName);
 				previousPage.addTuple(tupleToInsert);
 				previousPage.sort();
-				tempVector=previousPage.readTuples();
+				tempVector = previousPage.readTuples();
 				if (tempVector.size() > maxRows) {
 					BitmapObject overFlowTuple = tempVector.remove(maxRows);
 					writeBitmapPage(previousPage, i - 1, colName);
@@ -663,7 +664,7 @@ public class Table implements Serializable {
 				return;
 			}
 		}
-		
+
 		if (tempVector.size() == maxRows) {
 			currentPage.addTuple(tupleToInsert);
 			currentPage.sort();
@@ -696,7 +697,7 @@ public class Table implements Serializable {
 		int pageNo = 0;
 		ArrayList attrs = new ArrayList(attrNo);
 		int countRows = 0;
-		ArrayList colNames = new ArrayList();
+		ArrayList<String> colNames = new ArrayList<String>();
 		Set<String> names = htblColNameValue.keySet();
 		int key = -1;
 		for (String name : names) {
@@ -717,36 +718,57 @@ public class Table implements Serializable {
 		}
 
 		Tuple tupleToInsert = new Tuple(attrs, key, colNames);
-
-		Page currentPage = null;
-
-		for (int i = 0; i < pages.size() - 1; i++) {
-			currentPage = readPage(i);
-			Vector<Tuple> tempVector = currentPage.readTuples();
-			for (int j = 0; j < tempVector.size(); j++) {
-				System.out.println(tupleToInsert);
-				System.out.println(tempVector.get(j));
-				if (tempVector.get(j).compareTo(tupleToInsert) == 2
-						|| tempVector.get(j).compareTo(tupleToInsert) == 0) {
-					throw new DBAppException("Duplicate Insertion");
+		if (isIndexed(colNames.get(key))) {
+			Object keyValue = attrs.get(key);
+			int page = binarySearchPages(keyValue, colNames.get(key));
+			BitmapObject smallerValue = binarySearchTuples(page, keyValue, colNames.get(key));
+			ArrayList<String> repPages = new ArrayList<String>();
+			if(smallerValue!=null) {
+			String reserve = smallerValue.getBitmap();
+			for (int i = 0; i < pages.size(); i++) { // Splits the bitmap according to pages and rows in each page
+				String pageString = "";
+				for (int j = 0; j < pages.get(i); j++) {
+					pageString = pageString + reserve.charAt(0);
+					reserve = reserve.substring(1);
 				}
+				repPages.add(pageString);
+			}
+			}
+			int i = 0;
+			int j = 0;
+			int count = 0;
+			for (int k = 0; k < repPages.size(); k++) {
+				for (int b = 0; b < repPages.get(k).length(); b++) {
+					if (repPages.get(k).charAt(b) == '1') {
+						i = k;
+						j = b;
+						k = repPages.size() + 1;
+						break;
+					}
+					count++;
+				}
+			}
+			Page currentPage = readPage(i);
+			Vector<Tuple> tempVector = currentPage.readTuples();
+			countRows = count;
+			if (i != pages.size() - 1&& smallerValue!=null) {
 				if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
 
 					if (j == 0 && i > 0) {
-						
+
 						Page previousPage = readPage(i - 1);
 						previousPage.addTuple(tupleToInsert);
 						previousPage.sort();
-						tempVector=previousPage.readTuples();
+						tempVector = previousPage.readTuples();
 						if (tempVector.size() > maxRows) {
 							Tuple overFlowTuple = tempVector.remove(maxRows);
 							writePage(previousPage, i - 1);
 							shiftingPages(overFlowTuple, i - 1);
 
-							bitmapHandleInsert(tupleToInsert, countRows-1);
+							bitmapHandleInsert(tupleToInsert, countRows - 1);
 						} else {
 							writePage(previousPage, i - 1);
-							bitmapHandleInsert(tupleToInsert, countRows-1);
+							bitmapHandleInsert(tupleToInsert, countRows - 1);
 						}
 						pages.set(i - 1, previousPage.readTuples().size());
 						return;
@@ -767,59 +789,148 @@ public class Table implements Serializable {
 
 						}
 					}
-					return;
 				}
-				countRows++;
-			}
-			pages.set(i, tempVector.size());
-		}
-
-		currentPage = readPage(pages.size() - 1);
-		Vector<Tuple> tempVector = currentPage.readTuples();
-		for (int j = 0; j < tempVector.size(); j++) {
-			if (tempVector.get(j).compareTo(tupleToInsert) == 2 || tempVector.get(j).compareTo(tupleToInsert) == 0) {
-				throw new DBAppException("Duplicate Insertion");
+				pages.set(i, tempVector.size());
 			} else {
-				if (tempVector.get(j).compareTo(tupleToInsert) < 0) {
-					countRows++;
+				countRows--;
+				if (tempVector.size() == maxRows) {
+
+					currentPage.addTuple(tupleToInsert);
+					currentPage.sort();
+					Tuple overFlow = tempVector.remove(maxRows);
+					writePage(currentPage, pages.size() - 1);
+					currentPage = new Page();
+					pages.add(1);
+					currentPage.addTuple(overFlow);
+					writePage(currentPage, pages.size() - 1);
+					bitmapHandleInsert(tupleToInsert, countRows);
+
+				} else {
+					if (currentPage.readTuples().size() > 0) {
+
+						currentPage.addTuple(tupleToInsert);
+						currentPage.sort();
+						pages.set(pages.size() - 1, tempVector.size());
+						writePage(currentPage, pages.size() - 1);
+						bitmapHandleInsert(tupleToInsert, countRows);
+
+					} else {
+
+						currentPage.addTuple(tupleToInsert);
+						currentPage.sort();
+						pages.set(pages.size() - 1, tempVector.size());
+						int num = 0;
+						writePage(currentPage, pages.size() - 1);
+						bitmapHandleInsert(tupleToInsert, countRows);
+
+					}
 				}
 			}
-
-		}
-		countRows--;
-		if (tempVector.size() == maxRows) {
-
-			currentPage.addTuple(tupleToInsert);
-			currentPage.sort();
-			Tuple overFlow = tempVector.remove(maxRows);
-			writePage(currentPage, pages.size() - 1);
-			currentPage = new Page();
-			pages.add(1);
-			currentPage.addTuple(overFlow);
-			writePage(currentPage, pages.size() - 1);
-			bitmapHandleInsert(tupleToInsert, countRows);
 
 		} else {
-			if (currentPage.readTuples().size() > 0) {
+			Page currentPage = null;
+
+			for (int i = 0; i < pages.size() - 1; i++) {
+				currentPage = readPage(i);
+				Vector<Tuple> tempVector = currentPage.readTuples();
+				for (int j = 0; j < tempVector.size(); j++) {
+					System.out.println(tupleToInsert);
+					System.out.println(tempVector.get(j));
+					if (tempVector.get(j).compareTo(tupleToInsert) == 2
+							|| tempVector.get(j).compareTo(tupleToInsert) == 0) {
+						throw new DBAppException("Duplicate Insertion");
+					}
+					if (tempVector.get(j).compareTo(tupleToInsert) > 0) {
+
+						if (j == 0 && i > 0) {
+
+							Page previousPage = readPage(i - 1);
+							previousPage.addTuple(tupleToInsert);
+							previousPage.sort();
+							tempVector = previousPage.readTuples();
+							if (tempVector.size() > maxRows) {
+								Tuple overFlowTuple = tempVector.remove(maxRows);
+								writePage(previousPage, i - 1);
+								shiftingPages(overFlowTuple, i - 1);
+
+								bitmapHandleInsert(tupleToInsert, countRows - 1);
+							} else {
+								writePage(previousPage, i - 1);
+								bitmapHandleInsert(tupleToInsert, countRows - 1);
+							}
+							pages.set(i - 1, previousPage.readTuples().size());
+							return;
+						} else {
+
+							currentPage.addTuple(tupleToInsert);
+							currentPage.sort();
+							if (tempVector.size() > maxRows) {
+								Tuple overFlowTuple = tempVector.remove(maxRows);
+								writePage(currentPage, i);
+								shiftingPages(overFlowTuple, ++i);
+								countRows--;
+								bitmapHandleInsert(tupleToInsert, countRows);
+
+							} else {
+								writePage(currentPage, i);
+								bitmapHandleInsert(tupleToInsert, countRows);
+
+							}
+						}
+						return;
+					}
+					countRows++;
+				}
+				pages.set(i, tempVector.size());
+			}
+
+			currentPage = readPage(pages.size() - 1);
+			Vector<Tuple> tempVector = currentPage.readTuples();
+			for (int j = 0; j < tempVector.size(); j++) {
+				if (tempVector.get(j).compareTo(tupleToInsert) == 2
+						|| tempVector.get(j).compareTo(tupleToInsert) == 0) {
+					throw new DBAppException("Duplicate Insertion");
+				} else {
+					if (tempVector.get(j).compareTo(tupleToInsert) < 0) {
+						countRows++;
+					}
+				}
+
+			}
+			countRows--;
+			if (tempVector.size() == maxRows) {
 
 				currentPage.addTuple(tupleToInsert);
 				currentPage.sort();
-				pages.set(pages.size() - 1, tempVector.size());
+				Tuple overFlow = tempVector.remove(maxRows);
+				writePage(currentPage, pages.size() - 1);
+				currentPage = new Page();
+				pages.add(1);
+				currentPage.addTuple(overFlow);
 				writePage(currentPage, pages.size() - 1);
 				bitmapHandleInsert(tupleToInsert, countRows);
 
 			} else {
+				if (currentPage.readTuples().size() > 0) {
 
-				currentPage.addTuple(tupleToInsert);
-				currentPage.sort();
-				pages.set(pages.size() - 1, tempVector.size());
-				int num = 0;
-				writePage(currentPage, pages.size() - 1);
-				bitmapHandleInsert(tupleToInsert, countRows);
+					currentPage.addTuple(tupleToInsert);
+					currentPage.sort();
+					pages.set(pages.size() - 1, tempVector.size());
+					writePage(currentPage, pages.size() - 1);
+					bitmapHandleInsert(tupleToInsert, countRows);
 
+				} else {
+
+					currentPage.addTuple(tupleToInsert);
+					currentPage.sort();
+					pages.set(pages.size() - 1, tempVector.size());
+					int num = 0;
+					writePage(currentPage, pages.size() - 1);
+					bitmapHandleInsert(tupleToInsert, countRows);
+
+				}
 			}
 		}
-
 	}
 
 	private void bitmapHandleInsert(Tuple tupleToInsert, int countRows) {
@@ -1218,30 +1329,106 @@ public class Table implements Serializable {
 		return result;
 	}
 
-	// public static int binarySearch(BitmapObject x)
-	// {
-	// for(int i=0;i<BitmappedPages.) {
-	// int l = 0, r = arr.length - 1;
-	// while (l <= r) {
-	// int m = l + (r - l) / 2;
-	//
-	// // Check if x is present at mid
-	// if (arr[m] == x)
-	// return m;
-	//
-	// // If x greater, ignore left half
-	// if (arr[m] < x)
-	// l = m + 1;
-	//
-	// // If x is smaller, ignore right half
-	// else
-	// r = m - 1;
-	// }
-	//
-	// // if we reach here, then element was
-	// // not present
-	// return -1;
-	// }
+	public int binarySearchPages(Object colValue, String colName) {
+		ArrayList<String> needed = new ArrayList<String>();
+		for (int i = 0; i < BitmapPages.size(); i++) {
+			if (BitmapPages.get(i).equals(colName)) {
+				needed.add(colName);
+			}
+		}
+		// System.out.println(needed);
+		BitmapObject inserted = new BitmapObject(colValue, "");
+		BitmapObject result;
+		int l = 0;
+		int r = needed.size() - 1;
+		while (l < r) {
+			int m = l + (r - l) / 2;
+
+			// Check if x is present at mid
+			BitMapPage middlePage = readBitmapPage(m, colName);
+			BitMapPage previousPage = null;
+			BitmapObject lastinPrevious = null;
+			BitMapPage nextPage = null;
+			// BitmapObject lastinPrevious = null;
+			if (m > 0) {
+				previousPage = readBitmapPage(m - 1, colName);
+				lastinPrevious = (BitmapObject) previousPage.readTuples().get(previousPage.readTuples().size() - 1);
+			}
+			if (m < needed.size() - 1) {
+				nextPage = readBitmapPage(m + 1, colName);
+				// lastinPrevious = (BitmapObject) previousPage.readTuples().get(0);
+			}
+			BitmapObject firstElement = (BitmapObject) middlePage.readTuples().get(0);
+			BitmapObject lastElement = (BitmapObject) middlePage.readTuples().get(middlePage.readTuples().size() - 1);
+			int rowCount = middlePage.readTuples().size();
+			if (inserted.compareTo(firstElement) > 0
+					&& (inserted.compareTo(lastElement) == -1 || inserted.compareTo(lastElement) == 2)) {
+
+				return m;
+			} else if (inserted.compareTo(lastElement) == 1) {
+				// if (inserted.compareTo(firstinNext) < 0) {
+				// return m;
+				// } else {
+				// l = m + 1;
+				// }
+				l = m + 1;
+			} else if (inserted.compareTo(firstElement) < 0 && m == 0) {
+				return m;
+			} else if (inserted.compareTo(lastElement) == 1 && nextPage == null) {
+				return m;
+			}
+			// If x is smaller, ignore right half
+			else if (inserted.compareTo(firstElement) == -1 && previousPage != null) {
+				if (inserted.compareTo(lastinPrevious) == 1) {
+					return m;
+				} else {
+					r = m - 1;
+				}
+			}
+		}
+
+		// if we reach here, then element was
+		// not present
+		return l;
+	}
+
+	public BitmapObject binarySearchTuples(int pageNo, Object colValue, String colName) throws DBAppException {
+		BitmapObject inserted = new BitmapObject(colValue, "");
+		BitMapPage page = readBitmapPage(pageNo, colName);
+		Vector<BitmapObject> tuples = page.readTuples();
+		int l = 0;
+		int r = tuples.size() - 1;
+		boolean greater = false;
+		while (l < r) {
+			int m = l + (r - l) / 2;
+
+			// Check if x is present at mid
+			BitmapObject middleObject = (BitmapObject) tuples.get(m);
+			if (inserted.compareTo(middleObject) == 0) {
+				throw new DBAppException("Duplicate Insertion");
+
+			} else if (inserted.compareTo(middleObject) == -1) {
+				r = m - 1;
+				greater = false;
+			} else if (inserted.compareTo(middleObject) == 1) {
+				l = m + 1;
+				greater = true;
+			}
+		}
+		// if we reach here, then element was
+		// not present
+		if (tuples.size() > 0) {
+			if (inserted.compareTo(tuples.get(l)) == 0) {
+				throw new DBAppException("Duplicate Insertion");
+			} else if (inserted.compareTo(tuples.get(l)) == 1&&l!=tuples.size()-1) {
+				return tuples.get(++l);
+			} else {
+				return tuples.get(l);
+			}
+		}
+		return null;
+	}
+
 	public Vector<Tuple> getVectorResult(String temp) {
 		int index = 0;
 		Vector<Tuple> result = new Vector<Tuple>();
@@ -1346,9 +1533,7 @@ public class Table implements Serializable {
 	}
 
 	public static void main(String[] args) {
-		String text = "0000000";
-		System.out.println(compressArray(text));
-		System.out.println(decompressArray(compressArray(text)));
+
 	}
 
 }

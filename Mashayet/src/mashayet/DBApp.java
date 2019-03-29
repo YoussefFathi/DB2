@@ -225,129 +225,130 @@ public class DBApp {
 			htblColNameValue.put("gpa", new Double(1.25));
 			app.insertIntoTable(strTableName, htblColNameValue);
 			app.printing(app);
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(23498));
-			htblColNameValue.put("name", new String("John Noor"));
-			htblColNameValue.put("gpa", new Double(1.5));
-			app.insertIntoTable(strTableName, htblColNameValue);
-			app.printing(app);
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(78452));
-			htblColNameValue.put("name", new String("Zaky Noor"));
-			htblColNameValue.put("gpa", new Double(1));
-			app.insertIntoTable(strTableName, htblColNameValue);
-			app.printing(app);
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(78452));
-			htblColNameValue.put("name", new String("Zaky Ypussef Fathi"));
-			htblColNameValue.put("gpa", new Double(1));
-
-			app.updateTable(strTableName, new Integer(78452), htblColNameValue); //Problem in bitmap after update (not consistent)
-			app.printing(app);
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(78452));
-			htblColNameValue.put("name", new String("Zaky Noor"));
-			htblColNameValue.put("gpa", new Double(1));
-			app.insertIntoTable(strTableName, htblColNameValue);
-			app.printing(app);
-			htblColNameValue.clear();
-			// htblColNameValue.put("id", new Integer(2343432));
-			htblColNameValue.put("name", new String("Ahmed Noor"));
-			htblColNameValue.put("gpa", new Double(0.95));
-//
-//			app.printing(app);
-//			app.deleteFromTable(strTableName, htblColNameValue);
-//			System.out.println("*************************************************************************22222");
-//			app.printing(app);
-//
 //			htblColNameValue.clear();
-//			htblColNameValue.put("id", new Integer(453455));
+//			htblColNameValue.put("id", new Integer(23498));
+//			htblColNameValue.put("name", new String("John Noor"));
+//			htblColNameValue.put("gpa", new Double(1.5));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			app.printing(app);
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(78452));
+//			htblColNameValue.put("name", new String("Zaky Noor"));
+//			htblColNameValue.put("gpa", new Double(1));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			app.printing(app);
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(78452));
+//			htblColNameValue.put("name", new String("Zaky Ypussef Fathi"));
+//			htblColNameValue.put("gpa", new Double(1));
+//
+//			app.updateTable(strTableName, new Integer(78452), htblColNameValue); // Problem in bitmap after update (not
+//																					// consistent)
+//			app.printing(app);
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(78452));
+//			htblColNameValue.put("name", new String("Zaky Noor"));
+//			htblColNameValue.put("gpa", new Double(1));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			app.printing(app);
+//			htblColNameValue.clear();
+//			// htblColNameValue.put("id", new Integer(2343432));
 //			htblColNameValue.put("name", new String("Ahmed Noor"));
 //			htblColNameValue.put("gpa", new Double(0.95));
-//
-////			app.deleteFromTable(strTableName, htblColNameValue);
-//			app.printing(app);
-//
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(5674567));
-			htblColNameValue.put("name", new String("Dalia Noor"));
-			htblColNameValue.put("gpa", new Double(1.25));
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(5674567));
-			htblColNameValue.put("name", new String("Dalia Noor"));
-			htblColNameValue.put("gpa", new Double(1.25));
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(5674567));
-			htblColNameValue.put("name", new String("Dalia Noor"));
-			htblColNameValue.put("gpa", new Double(1.35));
-//			// // app.insertIntoTable(strTableName, htblColNameValue);
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(784352));
-			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
-			htblColNameValue.put("gpa", new Double(11));
-			app.insertIntoTable(strTableName, htblColNameValue);
-//			app.printing(app);
-//			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(784351));
-			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
-			htblColNameValue.put("gpa", new Double(11));
-			app.insertIntoTable(strTableName, htblColNameValue);
-//			app.printing(app);
-//			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(784353));
-			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
-			htblColNameValue.put("gpa", new Double(11));
-			app.insertIntoTable(strTableName, htblColNameValue);
-//			app.printing(app);
-//			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(7843544));
-			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
-			htblColNameValue.put("gpa", new Double(11));
-			app.insertIntoTable(strTableName, htblColNameValue);
-//			app.printing(app);
-//
-//			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(784));
-			htblColNameValue.put("name", new String("Zaky bo2loz Youssef2"));
-			htblColNameValue.put("gpa", new Double(7));
-
-			 app.updateTable(strTableName, new Integer(784353), htblColNameValue);
-//
-//			// // app.createBitmapIndex(strTableName, "name");
-//			// // app.createBitmapIndex(strTableName, "gpa");
-//			// // app.createBitmapIndex(strTableName, "id");
-//
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(567456127));
-			htblColNameValue.put("name", new String("Dalaia Noor"));
-			htblColNameValue.put("gpa", new Double(1.25));
-			app.insertIntoTable(strTableName, htblColNameValue);
-			app.printing(app);
-//			htblColNameValue.clear();
-//			// htblColNameValue.put("id", new Integer(784));
-//			htblColNameValue.put("name", new String("Zaky bo2loz Youssef"));
-//			// htblColNameValue.put("gpa", new Double(7.0));
-//
-//			app.updateTable(strTableName, new Integer(567456127), htblColNameValue);
-//			app.printing(app);
-//			htblColNameValue.clear();
-//			htblColNameValue.put("name", new String("Zaky Noor"));
-//			app.deleteFromTable(strTableName, htblColNameValue);
-//			htblColNameValue.clear();
-//
-//			htblColNameValue.put("gpa", new Double(11.0)); // TRY FIRST WITH COMMENTS
-//			// THEN COMPARE WITH RESULT AFTER REMOVING COMMENTS
-//
-//			app.deleteFromTable(strTableName, htblColNameValue);
-//
+//			//
+//			// app.printing(app);
 //			// app.deleteFromTable(strTableName, htblColNameValue);
-//			app.printing(app);
+//			// System.out.println("*************************************************************************22222");
+//			// app.printing(app);
+//			//
+//			// htblColNameValue.clear();
+//			// htblColNameValue.put("id", new Integer(453455));
+//			// htblColNameValue.put("name", new String("Ahmed Noor"));
+//			// htblColNameValue.put("gpa", new Double(0.95));
+//			//
+//			//// app.deleteFromTable(strTableName, htblColNameValue);
+//			// app.printing(app);
+//			//
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(5674567));
+//			htblColNameValue.put("name", new String("Dalia Noor"));
+//			htblColNameValue.put("gpa", new Double(1.25));
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(5674567));
+//			htblColNameValue.put("name", new String("Dalia Noor"));
+//			htblColNameValue.put("gpa", new Double(1.25));
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(5674567));
+//			htblColNameValue.put("name", new String("Dalia Noor"));
+//			htblColNameValue.put("gpa", new Double(1.35));
+//			// // // app.insertIntoTable(strTableName, htblColNameValue);
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(784352));
+//			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
+//			htblColNameValue.put("gpa", new Double(11));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			// app.printing(app);
+//			// htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(784351));
+//			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
+//			htblColNameValue.put("gpa", new Double(11));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			// app.printing(app);
+//			// htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(784353));
+//			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
+//			htblColNameValue.put("gpa", new Double(11));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			// app.printing(app);
+//			// htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(7843544));
+//			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
+//			htblColNameValue.put("gpa", new Double(11));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			// app.printing(app);
+//			//
+//			// htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(784));
+//			htblColNameValue.put("name", new String("Zaky bo2loz Youssef2"));
+//			htblColNameValue.put("gpa", new Double(7));
 //
-//			System.out.println("************************");
+//			app.updateTable(strTableName, new Integer(784353), htblColNameValue);
+//			//
+//			// // // app.createBitmapIndex(strTableName, "name");
+//			// // // app.createBitmapIndex(strTableName, "gpa");
+//			// // // app.createBitmapIndex(strTableName, "id");
+//			//
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(567456127));
+//			htblColNameValue.put("name", new String("Dalaia Noor"));
+//			htblColNameValue.put("gpa", new Double(1.25));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			app.printing(app);
+//			// htblColNameValue.clear();
+//			// // htblColNameValue.put("id", new Integer(784));
+//			// htblColNameValue.put("name", new String("Zaky bo2loz Youssef"));
+//			// // htblColNameValue.put("gpa", new Double(7.0));
+//			//
+//			// app.updateTable(strTableName, new Integer(567456127), htblColNameValue);
+//			// app.printing(app);
+//			// htblColNameValue.clear();
+//			// htblColNameValue.put("name", new String("Zaky Noor"));
+//			// app.deleteFromTable(strTableName, htblColNameValue);
+//			htblColNameValue.clear();
+//			//
+//			htblColNameValue.put("gpa", new Double(11.0)); // TRY FIRST WITH COMMENTS
+//			// // THEN COMPARE WITH RESULT AFTER REMOVING COMMENTS
+//			//
+//			app.deleteFromTable(strTableName, htblColNameValue);
+//			app.printing(app);
+//			// // app.deleteFromTable(strTableName, htblColNameValue);
+//			// app.printing(app);
+//			//
+//			// System.out.println("************************");
 //			SQLTerm[] arrSQLTerms;
 //			arrSQLTerms = new SQLTerm[2];
 //			arrSQLTerms[0] = new SQLTerm("Student", "gpa", ">", "1.0");
-//			arrSQLTerms[1] = new SQLTerm("Student", "name", "<", "John Noor");
+//			arrSQLTerms[1] = new SQLTerm("Student", "name", ">", "John Noor");
 //			// arrSQLTerms[0]._strTableName = "Student";
 //			// arrSQLTerms[0]._strColumnName= "name";
 //			// arrSQLTerms[0]._strOperator = "=";
@@ -358,7 +359,15 @@ public class DBApp {
 //			while (resultSet.hasNext()) {
 //				System.out.println(resultSet.next());
 //			}
-
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(5674568));
+//			htblColNameValue.put("name", new String("test"));
+//			htblColNameValue.put("gpa", new Double(1.25));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			app.printing(app);
+//			int page = (app.readTable("Student").binarySearchPages(new Integer(5674568), "id"));
+//			System.out.println(page);
+//			System.out.println(app.readTable("Student").binarySearchTuples(page, new Integer(5674568), "id"));
 			// boolean found = false;
 			// int first = 0;
 			// System.out.println(t.getBitmapPages());
@@ -375,7 +384,7 @@ public class DBApp {
 
 		} catch (DBAppException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 
 	}
@@ -391,19 +400,21 @@ public class DBApp {
 			int first = 0;
 			System.out.println(t.getBitmapPages());
 			for (int i = 0; i < t.getBitmapPages().size(); i++) {
-				if ((t.getBitmapPages().get(i)).equals("gpa") && !found) {
+				if ((t.getBitmapPages().get(i)).equals("id") && !found) {
 					first = i;
 					found = true;
 					System.out.println("BitMapPage :" + (i - first));
-					t.readBitmapPage(i - first, "gpa");
-				} else if (found && (t.getBitmapPages().get(i)).equals("gpa")) {
+					t.readBitmapPage(i - first, "id");
+				} else if (found && (t.getBitmapPages().get(i)).equals("id")) {
 					System.out.println("BitMapPage :" + (i - first));
-					t.readBitmapPage(i - first, "gpa");
-				} else if (found && !((t.getBitmapPages().get(i)).equals("gpa"))) {
+					t.readBitmapPage(i - first, "id");
+				} else if (found && !((t.getBitmapPages().get(i)).equals("id"))) {
 
 				}
 			}
+
 			System.out.println(t.getPages());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
