@@ -723,14 +723,21 @@ public class Table implements Serializable {
 			int page = binarySearchPages(keyValue, colNames.get(key));
 			BitmapObject smallerValue = binarySearchTuples(page, keyValue, colNames.get(key));
 			ArrayList<String> repPages = new ArrayList<String>();
+
+			Object tempVal = "";
 			if (smallerValue != null) {
 				String reserve = smallerValue.getBitmap();
+				tempVal = smallerValue.getColValue();
+
 				for (int i = 0; i < pages.size(); i++) { // Splits the bitmap according to
 					// pages and rows in each page
 					String pageString = "";
 					for (int j = 0; j < pages.get(i); j++) {
 						pageString = pageString + reserve.charAt(0);
 						reserve = reserve.substring(1);
+					}
+					if (tempVal.equals(new Integer(-20))&& i==pages.size()-1) {
+						pageString += "1";
 					}
 					repPages.add(pageString);
 				}
@@ -742,7 +749,11 @@ public class Table implements Serializable {
 				for (int b = 0; b < repPages.get(k).length(); b++) {
 					if (repPages.get(k).charAt(b) == '1') {
 						i = k;
-						j = b;
+						if (tempVal.equals(new Integer(-20))) {
+							j = b - 1;
+						} else {
+							j = b;
+						}
 						k = repPages.size() + 1;
 						break;
 					}
@@ -774,7 +785,7 @@ public class Table implements Serializable {
 						pages.set(i - 1, previousPage.readTuples().size());
 						return;
 					} else {
-						
+
 						currentPage.addTuple(tupleToInsert);
 						currentPage.sort();
 						if (tempVector.size() > maxRows) {
@@ -808,7 +819,7 @@ public class Table implements Serializable {
 
 				} else {
 					if (currentPage.readTuples().size() > 0) {
-						
+
 						currentPage.addTuple(tupleToInsert);
 						currentPage.sort();
 						pages.set(pages.size() - 1, tempVector.size());
@@ -1169,7 +1180,7 @@ public class Table implements Serializable {
 			if (BitmapPages.get(i).equals(colName) && !found) {
 				first = i;
 				found = true;
-
+			}else if(BitmapPages.get(i).equals(colName)) {
 				BitMapPage currentPage = readBitmapPage(i - first, colName);
 				Vector<BitmapObject> vec = currentPage.readTuples();
 				for (int j = 0; j < vec.size(); j++) {
@@ -1423,6 +1434,17 @@ public class Table implements Serializable {
 				throw new DBAppException("Duplicate Insertion");
 			} else if (inserted.compareTo(tuples.get(l)) == 1 && l != tuples.size() - 1) {
 				return tuples.get(++l);
+			} else if (inserted.compareTo(tuples.get(l)) == 1 && l == tuples.size() - 1 && tuples.size() != maxRows) {
+				int sum = 0;
+				for (int i = 0; i < pages.size(); i++) {
+					sum = sum + pages.get(i);
+				}
+				String bitmap = "";
+				for (int i = 0; i < sum; i++) {
+					bitmap += "0";
+				}
+				bitmap += "1";
+				return new BitmapObject(new Integer(-20), bitmap);
 			} else {
 				return tuples.get(l);
 			}

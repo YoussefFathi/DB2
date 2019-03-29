@@ -175,6 +175,7 @@ public class DBApp {
 				temp = xorBitmap(temp, resultSet.poll());
 				break;
 			}
+			count++;
 		}
 		System.out.println(temp);
 		return t.getVectorResult(temp).iterator();
@@ -281,7 +282,7 @@ public class DBApp {
 			htblColNameValue.put("id", new Integer(5674567));
 			htblColNameValue.put("name", new String("Dalia Noor"));
 			htblColNameValue.put("gpa", new Double(1.35));
-			// // // app.insertIntoTable(strTableName, htblColNameValue);
+			 app.insertIntoTable(strTableName, htblColNameValue);
 			htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(784352));
 			htblColNameValue.put("name", new String("Zaky bo2loz Noor"));
@@ -308,23 +309,29 @@ public class DBApp {
 			 app.printing(app);
 			//
 			 htblColNameValue.clear();
+				htblColNameValue.put("id", new Integer(7843545));
+				htblColNameValue.put("name", new String("TEST4"));
+				htblColNameValue.put("gpa", new Double(7));
+				app.insertIntoTable(strTableName, htblColNameValue);
+			app.printing(app);
+			 htblColNameValue.clear();
 			htblColNameValue.put("id", new Integer(784353));
 			htblColNameValue.put("name", new String("Zaky bo2loz Youssef2"));
 			htblColNameValue.put("gpa", new Double(7));
 
 			app.updateTable(strTableName, new Integer(784353), htblColNameValue);
 			app.printing(app);
-//			//
+		
 //			// // // app.createBitmapIndex(strTableName, "name");
 //			// // // app.createBitmapIndex(strTableName, "gpa");
 //			// // // app.createBitmapIndex(strTableName, "id");
 //			//
-			htblColNameValue.clear();
-			htblColNameValue.put("id", new Integer(567456127));
-			htblColNameValue.put("name", new String("Dalaia Noor"));
-			htblColNameValue.put("gpa", new Double(1.25));
-			app.insertIntoTable(strTableName, htblColNameValue);
-			app.printing(app);
+//			htblColNameValue.clear();
+//			htblColNameValue.put("id", new Integer(567456129));
+//			htblColNameValue.put("name", new String("Test3"));
+//			htblColNameValue.put("gpa", new Double(1.25));
+//			app.insertIntoTable(strTableName, htblColNameValue);
+//			app.printing(app);
 //			// htblColNameValue.clear();
 //			// // htblColNameValue.put("id", new Integer(784));
 //			// htblColNameValue.put("name", new String("Zaky bo2loz Youssef"));
@@ -346,20 +353,20 @@ public class DBApp {
 //			// app.printing(app);
 //			//
 //			// System.out.println("************************");
-//			SQLTerm[] arrSQLTerms;
-//			arrSQLTerms = new SQLTerm[2];
-//			arrSQLTerms[0] = new SQLTerm("Student", "gpa", ">", "1.0");
-//			arrSQLTerms[1] = new SQLTerm("Student", "name", ">", "John Noor");
-//			// arrSQLTerms[0]._strTableName = "Student";
-//			// arrSQLTerms[0]._strColumnName= "name";
-//			// arrSQLTerms[0]._strOperator = "=";
-//			// arrSQLTerms[0]._objValue = "John Noor";
-//			String[] strarrOperators = new String[1];
-//			strarrOperators[0] = "AND";
-//			Iterator resultSet = app.selectFromTable(arrSQLTerms, strarrOperators);
-//			while (resultSet.hasNext()) {
-//				System.out.println(resultSet.next());
-//			}
+			SQLTerm[] arrSQLTerms;
+			arrSQLTerms = new SQLTerm[2];
+			arrSQLTerms[0] = new SQLTerm("Student", "gpa", ">", "1.0");
+			arrSQLTerms[1] = new SQLTerm("Student", "name", ">", "John Noor");
+			// arrSQLTerms[0]._strTableName = "Student";
+			// arrSQLTerms[0]._strColumnName= "name";
+			// arrSQLTerms[0]._strOperator = "=";
+			// arrSQLTerms[0]._objValue = "John Noor";
+			String[] strarrOperators = new String[1];
+			strarrOperators[0] = "AND";
+			Iterator resultSet = app.selectFromTable(arrSQLTerms, strarrOperators);
+			while (resultSet.hasNext()) {
+				System.out.println(resultSet.next());
+			}
 //			htblColNameValue.clear();
 //			htblColNameValue.put("id", new Integer(5674568));
 //			htblColNameValue.put("name", new String("test"));
