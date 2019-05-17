@@ -13,6 +13,8 @@ public class SQLTerm {
 		this._strOperator = _strOperator;
 		this._objValue = _objValue;
 	}
+	public SQLTerm() {
+	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
